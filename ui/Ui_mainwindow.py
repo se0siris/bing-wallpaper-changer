@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'C:\dev\Python\Bing Wallpaper Changer\ui\mainwindow.ui'
 #
-# Created: Sat Feb 23 20:27:23 2013
+# Created: Sat Feb 23 21:22:34 2013
 #      by: PyQt4 UI code generator 4.9.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ class Ui_MainWindow(object):
         self.verticalLayout = QtGui.QVBoxLayout(self.centralWidget)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.frame = QtGui.QFrame(self.centralWidget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.frame.sizePolicy().hasHeightForWidth())
@@ -37,7 +37,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.frame)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
         self.lbl_image_preview = ImageLabel(self.frame)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.MinimumExpanding)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.lbl_image_preview.sizePolicy().hasHeightForWidth())
@@ -48,6 +48,11 @@ class Ui_MainWindow(object):
         self.lbl_image_preview.setObjectName(_fromUtf8("lbl_image_preview"))
         self.verticalLayout_2.addWidget(self.lbl_image_preview)
         self.lbl_image_info = QtGui.QLabel(self.frame)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.lbl_image_info.sizePolicy().hasHeightForWidth())
+        self.lbl_image_info.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setBold(True)
         font.setWeight(75)
@@ -55,6 +60,11 @@ class Ui_MainWindow(object):
         self.lbl_image_info.setObjectName(_fromUtf8("lbl_image_info"))
         self.verticalLayout_2.addWidget(self.lbl_image_info)
         self.lbl_image_date = QtGui.QLabel(self.frame)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.lbl_image_date.sizePolicy().hasHeightForWidth())
+        self.lbl_image_date.setSizePolicy(sizePolicy)
         self.lbl_image_date.setText(_fromUtf8(""))
         self.lbl_image_date.setObjectName(_fromUtf8("lbl_image_date"))
         self.verticalLayout_2.addWidget(self.lbl_image_date)
