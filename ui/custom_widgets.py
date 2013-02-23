@@ -6,7 +6,7 @@ __author__ = 'Gary'
 
 class ImageLabel(QLabel):
     def sizeHint(self):
-        return QSize(0, 192)
+        return QSize(0, 0)
 
 
 class SystemTrayIcon(QSystemTrayIcon):
