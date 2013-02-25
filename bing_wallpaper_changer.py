@@ -11,7 +11,7 @@ from PyQt4.QtGui import QApplication, QStyleFactory, QIcon, QPixmap
 from ui.mainwindow import MainWindow
 
 
-VERSION = '1.0.1 - 23/02/2013'
+VERSION = '1.1.0 - 25/02/2013'
 
 
 def startmain():
@@ -36,8 +36,8 @@ def startmain():
     QLocale.setDefault(QLocale(QLocale.English, QLocale.UnitedKingdom))
 
     mainwindow = MainWindow()
-    # mainwindow.show()
-    sys.exit(app.exec_( ))
+    mainwindow.show()
+    sys.exit(app.exec_())
 
 
 if __name__ == "__main__":
