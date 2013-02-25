@@ -149,7 +149,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         temp_path = os.path.join(tempfile.gettempdir(), 'bing_wallpaper.jpg')
         self.preview_image.save(temp_path, quality=100)
         SPI_SETDESKWALLPAPER = 20  # According to http://support.microsoft.com/default.aspx?scid=97142
-        ctypes.windll.user32.SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, temp_path, 0)
+        ctypes.windll.user32.SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, temp_path, 1)
 
     @pyqtSignature('int')
     def on_cb_resolution_currentIndexChanged(self, index):
