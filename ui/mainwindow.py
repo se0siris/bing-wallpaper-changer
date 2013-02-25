@@ -49,7 +49,7 @@ class ImageDownloader(QThread):
         image_url = '{}_{}.jpg'.format(base_url, self.resolution)
         if image_url == self.last_image_url:
             print 'Image is the same as last downloaded image.'
-            self.download_finished.emit(QImage(), '', '')
+            self.download_finished.emit(QImage(), QDate(), '')
             return
         self.last_image_url = image_url
         print image_url
@@ -105,9 +105,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.setVisible(False)
 
     def system_tray_icon_activated(self, reason):
-        print 'Activated!'
         if reason == QSystemTrayIcon.DoubleClick:
             self.setVisible(True)
+            self.setFocus()
             self.update_preview_size()
 
     def download_finished(self, wallpaper_image, start_date, copyright_info):

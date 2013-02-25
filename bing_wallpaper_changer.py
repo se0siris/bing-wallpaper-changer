@@ -11,7 +11,7 @@ from PyQt4.QtGui import QApplication, QStyleFactory, QIcon, QPixmap
 from ui.mainwindow import MainWindow
 
 
-VERSION = '1.0 - 23/02/2013'
+VERSION = '1.0.1 - 23/02/2013'
 
 
 def startmain():
