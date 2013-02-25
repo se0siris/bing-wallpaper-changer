@@ -10,7 +10,7 @@ import urllib2
 from xml.etree import ElementTree
 
 from PyQt4.QtGui import QMainWindow, QApplication, QImage, QPixmap, QSystemTrayIcon
-from PyQt4.QtCore import pyqtSignature, QThread, pyqtSignal, Qt, QString, QDate, QTimer
+from PyQt4.QtCore import pyqtSignature, QThread, pyqtSignal, Qt, QString, QDate, QTimer, QProcess
 
 from Ui_mainwindow import Ui_MainWindow
 from ui.custom_widgets import SystemTrayIcon
@@ -110,7 +110,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def load_settings(self):
         self.cb_resolution.setCurrentIndex(self.settings.get_image_resolution())
 
-        self.sb_update_interval.setValue(self.settings.get_auto_update_interval() / 1000)
+        self.sb_update_interval.setValue(self.settings.get_auto_update_interval() / 60000)
+        self.on_sb_update_interval_valueChanged(self.sb_update_interval.value())
         self.cb_auto_update.setChecked(self.settings.get_auto_update_enabled())
 
         self.cb_run_command.setChecked(self.settings.get_run_command_enabled())
@@ -118,8 +119,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def system_tray_icon_activated(self, reason):
         if reason == QSystemTrayIcon.DoubleClick:
-            self.setVisible(True)
-            self.setFocus()
+            self.show()
             self.update_preview_size()
 
     def download_finished(self, wallpaper_image, start_date, copyright_info):
@@ -150,6 +150,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.preview_image.save(temp_path, quality=100)
         SPI_SETDESKWALLPAPER = 20  # According to http://support.microsoft.com/default.aspx?scid=97142
         ctypes.windll.user32.SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, temp_path, 1)
+        if self.cb_run_command.isChecked() and self.le_command.text():
+            error = QProcess.execute(self.le_command.text())
+            if error:
+                self.system_tray_icon.showMessage('Error running command',
+                                                  'The command specified in the settings failed to run. Please check '
+                                                  'the path.',
+                                                  QSystemTrayIcon.Critical)
 
     @pyqtSignature('int')
     def on_cb_resolution_currentIndexChanged(self, index):
@@ -166,6 +173,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @pyqtSignature('int')
     def on_sb_update_interval_valueChanged(self, minutes):
+        print 'INTERVAL CHANGED:', minutes
         if minutes == 1:
             self.sb_update_interval.setSuffix(' minute')
         else:
