@@ -36,7 +36,7 @@ def startmain():
     QLocale.setDefault(QLocale(QLocale.English, QLocale.UnitedKingdom))
 
     mainwindow = MainWindow()
-    mainwindow.show()
+    # mainwindow.show()
     sys.exit(app.exec_())
 
 
