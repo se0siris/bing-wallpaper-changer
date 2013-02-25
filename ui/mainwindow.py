@@ -14,6 +14,7 @@ from PyQt4.QtCore import pyqtSignature, QThread, pyqtSignal, Qt, QString, QDate,
 
 from Ui_mainwindow import Ui_MainWindow
 from ui.custom_widgets import SystemTrayIcon
+from ui.settings import Settings
 
 
 class ImageDownloader(QThread):
@@ -78,7 +79,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         title = '%s - v%s' % (str(self.app.applicationName()), str(self.app.applicationVersion()))
         self.setWindowTitle(title)
 
-        self.preview_pixmap = QPixmap()
+        self.preview_image = QImage()
+        self.refresh_timer = QTimer()
+        self.settings = Settings()
+        self.load_settings()
 
         self.system_tray_icon = SystemTrayIcon(self.app.windowIcon(), self)
         self.system_tray_icon.activated.connect(self.system_tray_icon_activated)
@@ -88,10 +92,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.image_downloader.download_finished.connect(self.download_finished)
         self.on_button_refresh_released()
 
-        self.refresh_timer = QTimer()
-        self.refresh_timer.setInterval(1200000)   # 20 minutes.
         self.refresh_timer.timeout.connect(self.on_button_refresh_released)
-        self.refresh_timer.start()
+        if self.cb_auto_update.isChecked():
+            self.refresh_timer.start()
 
     def resizeEvent(self, event):
         QMainWindow.resizeEvent(self, event)
@@ -104,6 +107,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             event.ignore()
             self.setVisible(False)
 
+    def load_settings(self):
+        self.cb_resolution.setCurrentIndex(self.settings.get_image_resolution())
+
+        self.sb_update_interval.setValue(self.settings.get_auto_update_interval() / 1000)
+        self.cb_auto_update.setChecked(self.settings.get_auto_update_enabled())
+
+        self.cb_run_command.setChecked(self.settings.get_run_command_enabled())
+        self.le_command.setText(self.settings.get_run_command_command())
+
     def system_tray_icon_activated(self, reason):
         if reason == QSystemTrayIcon.DoubleClick:
             self.setVisible(True)
@@ -112,7 +124,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def download_finished(self, wallpaper_image, start_date, copyright_info):
         if not wallpaper_image.isNull():
-            self.preview_pixmap = QPixmap.fromImage(wallpaper_image)
+            self.preview_image = wallpaper_image
             self.update_preview_size()
             self.lbl_image_info.setText(copyright_info)
             self.lbl_image_date.setText(start_date.toString('dddd, dd MMMM, yyyy'))
@@ -121,10 +133,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.button_refresh.setEnabled(True)
 
     def update_preview_size(self):
-        if self.preview_pixmap.isNull():
+        if self.preview_image.isNull():
             return
         label_size = self.lbl_image_preview.size()
-        resized_pixmap = self.preview_pixmap.scaled(label_size, Qt.KeepAspectRatio, Qt.FastTransformation)
+        resized_pixmap = QPixmap.fromImage(self.preview_image).scaled(label_size,
+                                                                      Qt.KeepAspectRatio,
+                                                                      Qt.SmoothTransformation)
         self.lbl_image_preview.setPixmap(resized_pixmap)
 
     def apply_wallpaper(self):
@@ -133,9 +147,43 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         print 'Applying wallpaper...'
         temp_path = os.path.join(tempfile.gettempdir(), 'bing_wallpaper.jpg')
-        self.preview_pixmap.save(temp_path, quality=100)
+        self.preview_image.save(temp_path, quality=100)
         SPI_SETDESKWALLPAPER = 20  # According to http://support.microsoft.com/default.aspx?scid=97142
         ctypes.windll.user32.SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, temp_path, 0)
+
+    @pyqtSignature('int')
+    def on_cb_resolution_currentIndexChanged(self, index):
+        self.settings.set_image_resolution(index)
+        self.image_downloader.set_resolution(str(self.cb_resolution.currentText()))
+
+    @pyqtSignature('bool')
+    def on_cb_auto_update_toggled(self, enabled):
+        self.settings.set_auto_update_enabled(enabled)
+        if enabled:
+            self.refresh_timer.start()
+        else:
+            self.refresh_timer.stop()
+
+    @pyqtSignature('int')
+    def on_sb_update_interval_valueChanged(self, minutes):
+        if minutes == 1:
+            self.sb_update_interval.setSuffix(' minute')
+        else:
+            self.sb_update_interval.setSuffix(' minutes')
+        interval = minutes * 60000
+        self.settings.set_auto_update_interval(interval)
+        self.refresh_timer.stop()
+        self.refresh_timer.setInterval(interval)
+        if self.cb_auto_update.isChecked():
+            self.refresh_timer.start()
+
+    @pyqtSignature('bool')
+    def on_cb_run_command_toggled(self, enabled):
+        self.settings.set_run_command_enabled(enabled)
+
+    @pyqtSignature('QString')
+    def on_le_command_textEdited(self, text):
+        self.settings.set_run_command_command(text)
 
     @pyqtSignature('')
     def on_button_close_released(self):
@@ -150,6 +198,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Slot documentation goes here.
         """
         print 'Refreshing...'
+        self.image_downloader.set_resolution(str(self.cb_resolution.currentText()))
         self.button_refresh.setEnabled(False)
         self.image_downloader.start()
 
