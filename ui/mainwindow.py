@@ -120,6 +120,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def system_tray_icon_activated(self, reason):
         if reason == QSystemTrayIcon.DoubleClick:
             self.show()
+            self.raise_()
             self.update_preview_size()
 
     def download_finished(self, wallpaper_image, start_date, copyright_info):
