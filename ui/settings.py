@@ -1,4 +1,6 @@
+import os
 from PyQt4.QtCore import QSettings, QVariant
+from PyQt4.QtGui import QDesktopServices
 
 __author__ = 'Gary Hughes'
 
@@ -7,9 +9,16 @@ class Settings(object):
     """
     Wrapper for the settings file to get/set values.
     """
-    settings = QSettings('settings.ini', QSettings.IniFormat)
 
     # Retrieve values.
+
+    def __init__(self):
+        settings_folder = str(QDesktopServices.storageLocation(QDesktopServices.DataLocation))
+        if not os.path.isdir(settings_folder):
+            os.makedirs(settings_folder)
+        settings_path = os.path.join(settings_folder, 'settings.ini')
+        print settings_path
+        self.settings = QSettings(settings_path, QSettings.IniFormat)
 
     def get_image_resolution(self):
         return self.settings.value('Image/resolution', QVariant(3)).toInt()[0]
