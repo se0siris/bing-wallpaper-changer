@@ -78,6 +78,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Set window title to include application version number.
         title = '%s - v%s' % (str(self.app.applicationName()), str(self.app.applicationVersion()))
         self.setWindowTitle(title)
+        self.lbl_version.setText(QString('Version %1').arg(self.app.applicationVersion()))
 
         self.preview_image = QImage()
         self.refresh_timer = QTimer()
