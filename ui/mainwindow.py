@@ -6,26 +6,30 @@ Module implementing MainWindow.
 import ctypes
 import os
 import tempfile
-import urllib2
 from xml.etree import ElementTree
 
-from PyQt4.QtGui import QMainWindow, QApplication, QImage, QPixmap, QSystemTrayIcon
-from PyQt4.QtCore import pyqtSignature, QThread, pyqtSignal, Qt, QString, QDate, QTimer, QProcess
+from PyQt4.QtGui import QMainWindow, QApplication, QImage, QPixmap, QSystemTrayIcon, QIcon, QListWidgetItem
+from PyQt4.QtCore import pyqtSignature, pyqtSignal, Qt, QString, QDate, QTimer, QProcess, QUrl, QObject, QSize
+from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest
 
 from Ui_mainwindow import Ui_MainWindow
 from ui.custom_widgets import SystemTrayIcon
 from ui.settings import Settings
 
 
-class ImageDownloader(QThread):
+class ImageDownloader(QObject):
 
     # Signals.
     download_finished = pyqtSignal(QImage, QDate, str)
+    thumbnail_download_finished = pyqtSignal(QImage, str, str)
+    status_text = pyqtSignal(QString)
 
     def __init__(self, parent=None):
-        QThread.__init__(self, parent)
+        QObject.__init__(self, parent)
         self.resolution = '1920x1200'
         self.last_image_url = None
+        self.manager = QNetworkAccessManager()
+        self.manager.finished.connect(self.reply_finished)
 
     def set_resolution(self, resolution):
         """
@@ -34,32 +38,75 @@ class ImageDownloader(QThread):
         """
         self.resolution = resolution
 
-    def run(self):
-        """
-        Download the latest image and return it with date and copyright info.
-        """
+    def _get_url(self, url_string, request_type=None, request_metadata=None):
+        url = QUrl(url_string)
+        request = QNetworkRequest(QUrl(url))
+        if not request_type is None:
+            request.setAttribute(QNetworkRequest.User, (request_type, request_metadata))
+        self.manager.get(request)
+
+    def get_daily_wallpaper(self):
+        self.status_text.emit('Checking for wallpaper update...')
         xml_url = 'http://www.bing.com/HPImageArchive.aspx?format=xml&idx=0&n=1&mkt=en-ww'
-        page = urllib2.urlopen(xml_url)
-        xml_content = page.read()
-        page.close()
-        root = ElementTree.fromstring(xml_content)
-        base_url = 'http://www.bing.com' + root[0].find('urlBase').text
-        start_date = QDate.fromString(root[0].find('startdate').text, 'yyyyMMdd')
-        copyright_info = root[0].find('copyright').text
+        self._get_url(xml_url, 0)
 
-        image_url = '{}_{}.jpg'.format(base_url, self.resolution)
-        if image_url == self.last_image_url:
-            print 'Image is the same as last downloaded image.'
-            self.download_finished.emit(QImage(), QDate(), '')
-            return
-        self.last_image_url = image_url
-        print image_url
+    def get_history_thumbs(self, day_index=0):
+        xml_url = 'http://www.bing.com/HPImageArchive.aspx?format=xml&idx={}&n=8&mkt=en-ww'.format(day_index)
+        self._get_url(xml_url, 3, day_index)
 
-        image_data = urllib2.urlopen(image_url)
-        wallpaper_image = QImage.fromData(image_data.read())
-        image_data.close()
-        print 'Image downloaded'
-        self.download_finished.emit(wallpaper_image, start_date, copyright_info)
+    def parse_daily_xml(self, xml_data, full_image=False, day_index=0):
+        root = ElementTree.fromstring(xml_data)
+
+        if full_image:
+            base_url = 'http://www.bing.com' + root[0].find('urlBase').text
+            start_date = QDate.fromString(root[0].find('startdate').text, 'yyyyMMdd')
+            copyright_info = root[0].find('copyright').text
+
+            image_url = '{}_{}.jpg'.format(base_url, self.resolution)
+            if image_url == self.last_image_url:
+                print 'Image is the same as last downloaded image.'
+                self.download_finished.emit(QImage(), QDate(), '')
+                return
+            self.status_text.emit('Downloading image...')
+            self.last_image_url = image_url
+            self._get_url(image_url, 1, (start_date, copyright_info))
+        else:
+            for image_number in xrange(len(root) - 1):
+                url = 'http://www.bing.com' + root[image_number].find('url').text
+                date_string = str(QDate.fromString(root[image_number].find('startdate').text,
+                                                   'yyyyMMdd').toString('ddd dd MMM'))
+                label = '{:02d} - {}'.format(image_number + 1 + day_index, date_string)
+                copyright_info = root[image_number].find('copyright').text
+                self._get_url(url, 4, (label, copyright_info))
+
+    def reply_finished(self, reply):
+        url = reply.url()
+        print 'URL Downloaded:', str(url.toEncoded())
+        if reply.error():
+            error_message = str(reply.errorString())
+            print 'Download of %s failed: %s' % (url.toEncoded(), error_message)
+        else:
+            print 'Mime-type:', str(reply.header(QNetworkRequest.ContentTypeHeader).toString())
+            data = reply.readAll()
+            attribute = reply.request().attribute(QNetworkRequest.User)
+            if not attribute.isNull():
+                request_type, request_metadata = attribute.toPyObject()
+                if request_type == 0:
+                    # Daily wallpaper XML.
+                    self.parse_daily_xml(data, True)
+                elif request_type == 1:
+                    start_date, copyright_info = request_metadata
+                    wallpaper_image = QImage.fromData(data)
+                    self.download_finished.emit(wallpaper_image, start_date, copyright_info)
+                if request_type == 3:
+                    # Daily wallpaper XML.
+                    day_index = request_metadata
+                    self.parse_daily_xml(data, False, day_index)
+                elif request_type == 4:
+                    label, copyright_info = request_metadata
+                    wallpaper_image = QImage.fromData(data)
+                    print copyright_info
+                    self.thumbnail_download_finished.emit(wallpaper_image, label, copyright_info)
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -82,6 +129,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.preview_image = QImage()
         self.refresh_timer = QTimer()
+        self.lbl_status.setText('')
         self.settings = Settings()
         self.load_settings()
 
@@ -90,7 +138,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.system_tray_icon.show()
 
         self.image_downloader = ImageDownloader()
+        self.image_downloader.status_text.connect(self.update_status_text)
         self.image_downloader.download_finished.connect(self.download_finished)
+        self.image_downloader.thumbnail_download_finished.connect(self.thumbnail_download_finished)
         self.on_button_refresh_released()
 
         self.refresh_timer.timeout.connect(self.on_button_refresh_released)
@@ -107,6 +157,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             event.ignore()
             self.setVisible(False)
+
+    def update_status_text(self, text):
+        self.lbl_status.setText(text)
+        self.app.processEvents()
 
     def load_settings(self):
         self.cb_resolution.setCurrentIndex(self.settings.get_image_resolution())
@@ -129,10 +183,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.preview_image = wallpaper_image
             self.update_preview_size()
             self.lbl_image_info.setText(copyright_info)
-            self.lbl_image_date.setText(start_date.toString('dddd, dd MMMM, yyyy'))
+            self.lbl_image_date.setText(start_date.toString('dddd, dd MMMM yyyy'))
             self.system_tray_icon.setToolTip(QString('%1\n%2').arg(self.app.applicationName(), copyright_info))
+            self.app.processEvents()
             self.apply_wallpaper()
         self.button_refresh.setEnabled(True)
+        self.lbl_status.setText('')
+
+    def thumbnail_download_finished(self, thumbnail_image, label, copyright_info):
+        icon = QIcon(QPixmap.fromImage(thumbnail_image.scaled(QSize(200, 200), Qt.KeepAspectRatio)))
+        widget_item = QListWidgetItem(icon, label)
+        widget_item.setToolTip(copyright_info)
+        self.lw_wallpaper_history.addItem(widget_item)
+        self.lw_wallpaper_history.sortItems(Qt.AscendingOrder)
 
     def update_preview_size(self):
         if self.preview_image.isNull():
@@ -148,11 +211,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Slot documentation goes here.
         """
         print 'Applying wallpaper...'
+        self.update_status_text('Applying wallpaper...')
         temp_path = os.path.join(tempfile.gettempdir(), 'bing_wallpaper.jpg')
         self.preview_image.save(temp_path, quality=100)
         SPI_SETDESKWALLPAPER = 20  # According to http://support.microsoft.com/default.aspx?scid=97142
         ctypes.windll.user32.SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, temp_path, 1)
         if self.cb_run_command.isChecked() and self.le_command.text():
+            self.update_status_text('Running custom command...')
             error = QProcess.execute(self.le_command.text())
             if error:
                 self.system_tray_icon.showMessage('Error running command',
@@ -210,6 +275,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         print 'Refreshing...'
         self.image_downloader.set_resolution(str(self.cb_resolution.currentText()))
         self.button_refresh.setEnabled(False)
-        self.image_downloader.start()
+        self.image_downloader.get_daily_wallpaper()
 
+    @pyqtSignature('int')
+    def on_tabWidget_currentChanged(self, index):
+        if index == 2:
+            print 'History'
+            self.lw_wallpaper_history.clear()
+            self.lw_wallpaper_history.setIconSize(QSize(200, 200))
+            for day_index in [0, 8, 16]:
+                self.image_downloader.get_history_thumbs(day_index)
 
