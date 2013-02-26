@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'C:\dev\Python\Bing Wallpaper Changer\ui\mainwindow.ui'
 #
-# Created: Tue Feb 26 10:05:47 2013
+# Created: Tue Feb 26 15:21:00 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(649, 373)
+        MainWindow.resize(717, 373)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/ui/ot_icon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
@@ -136,9 +136,14 @@ class Ui_MainWindow(object):
         self.tab_history.setObjectName(_fromUtf8("tab_history"))
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.tab_history)
         self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
-        self.lv_wallpaper_history = QtGui.QListView(self.tab_history)
-        self.lv_wallpaper_history.setObjectName(_fromUtf8("lv_wallpaper_history"))
-        self.verticalLayout_4.addWidget(self.lv_wallpaper_history)
+        self.lw_wallpaper_history = QtGui.QListWidget(self.tab_history)
+        self.lw_wallpaper_history.setMovement(QtGui.QListView.Static)
+        self.lw_wallpaper_history.setResizeMode(QtGui.QListView.Adjust)
+        self.lw_wallpaper_history.setSpacing(5)
+        self.lw_wallpaper_history.setViewMode(QtGui.QListView.IconMode)
+        self.lw_wallpaper_history.setUniformItemSizes(True)
+        self.lw_wallpaper_history.setObjectName(_fromUtf8("lw_wallpaper_history"))
+        self.verticalLayout_4.addWidget(self.lw_wallpaper_history)
         self.tabWidget.addTab(self.tab_history, _fromUtf8(""))
         self.tab_about = QtGui.QWidget()
         self.tab_about.setObjectName(_fromUtf8("tab_about"))
@@ -192,6 +197,9 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.addWidget(self.tabWidget)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.lbl_status = QtGui.QLabel(self.centralWidget)
+        self.lbl_status.setObjectName(_fromUtf8("lbl_status"))
+        self.horizontalLayout.addWidget(self.lbl_status)
         spacerItem7 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem7)
         self.button_refresh = QtGui.QPushButton(self.centralWidget)
@@ -236,6 +244,7 @@ class Ui_MainWindow(object):
         self.label_7.setText(_translate("MainWindow", "Copyright © 2013 Gary Hughes, overThere.co.uk", None))
         self.label_8.setText(_translate("MainWindow", "<html><head/><body><p>This program is released under the GPL v3 and all source can be downloaded from:</p><p><a href=\"https://bitbucket.org/gary_hughes/bing-wallpaper-changer\"><span style=\" text-decoration: underline; color:#0000ff;\">https://bitbucket.org/gary_hughes/bing-wallpaper-changer</span></a></p></body></html>", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_about), _translate("MainWindow", "About", None))
+        self.lbl_status.setText(_translate("MainWindow", "CURRENT STATUS", None))
         self.button_refresh.setText(_translate("MainWindow", "Refresh", None))
         self.button_close.setText(_translate("MainWindow", "Close", None))
         self.actionDelete_Files.setText(_translate("MainWindow", "Delete Files", None))
