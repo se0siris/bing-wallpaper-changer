@@ -13,7 +13,7 @@ from PyQt4.QtCore import pyqtSignature, pyqtSignal, Qt, QString, QDate, QTimer, 
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest
 
 from Ui_mainwindow import Ui_MainWindow
-from ui.custom_widgets import SystemTrayIcon
+from ui.custom_widgets import SystemTrayIcon, ListWidgetItem
 from ui.settings import Settings
 
 
@@ -74,10 +74,10 @@ class ImageDownloader(QObject):
             for image_number in xrange(len(root) - 1):
                 url = 'http://www.bing.com' + root[image_number].find('url').text
                 date_string = str(QDate.fromString(root[image_number].find('startdate').text,
-                                                   'yyyyMMdd').toString('ddd dd MMM'))
+                                                   'yyyyMMdd').toString('dddd dd MMMM'))
                 label = '{:02d} - {}'.format(image_number + 1 + day_index, date_string)
                 copyright_info = root[image_number].find('copyright').text
-                self._get_url(url, 4, (label, copyright_info))
+                self._get_url(url, 4, (date_string, copyright_info))
 
     def reply_finished(self, reply):
         url = reply.url()
@@ -192,7 +192,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def thumbnail_download_finished(self, thumbnail_image, label, copyright_info):
         icon = QIcon(QPixmap.fromImage(thumbnail_image.scaled(QSize(200, 200), Qt.KeepAspectRatio)))
-        widget_item = QListWidgetItem(icon, label)
+        widget_item = ListWidgetItem(icon, label)
         widget_item.setToolTip(copyright_info)
         self.lw_wallpaper_history.addItem(widget_item)
         self.lw_wallpaper_history.sortItems(Qt.AscendingOrder)
