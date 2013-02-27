@@ -86,7 +86,7 @@ class ImageDownloader(QObject):
             error_message = str(reply.errorString())
             print 'Download of %s failed: %s' % (url.toEncoded(), error_message)
         else:
-            print 'Mime-type:', str(reply.header(QNetworkRequest.ContentTypeHeader).toString())
+            # print 'Mime-type:', str(reply.header(QNetworkRequest.ContentTypeHeader).toString())
             data = reply.readAll()
             attribute = reply.request().attribute(QNetworkRequest.User)
             if not attribute.isNull():
@@ -105,7 +105,6 @@ class ImageDownloader(QObject):
                 elif request_type == 4:
                     label, copyright_info = request_metadata
                     wallpaper_image = QImage.fromData(data)
-                    print copyright_info
                     self.thumbnail_download_finished.emit(wallpaper_image, label, copyright_info)
 
 
