@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'C:\dev\Python\Bing Wallpaper Changer\ui\mainwindow.ui'
 #
-# Created: Tue Feb 26 15:21:00 2013
+# Created: Wed Feb 27 16:00:26 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -61,6 +61,7 @@ class Ui_MainWindow(object):
         font.setBold(True)
         font.setWeight(75)
         self.lbl_image_info.setFont(font)
+        self.lbl_image_info.setWordWrap(True)
         self.lbl_image_info.setObjectName(_fromUtf8("lbl_image_info"))
         self.verticalLayout.addWidget(self.lbl_image_info)
         self.lbl_image_date = QtGui.QLabel(self.tab_preview)
@@ -70,6 +71,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.lbl_image_date.sizePolicy().hasHeightForWidth())
         self.lbl_image_date.setSizePolicy(sizePolicy)
         self.lbl_image_date.setText(_fromUtf8(""))
+        self.lbl_image_date.setWordWrap(True)
         self.lbl_image_date.setObjectName(_fromUtf8("lbl_image_date"))
         self.verticalLayout.addWidget(self.lbl_image_date)
         self.tabWidget.addTab(self.tab_preview, _fromUtf8(""))
