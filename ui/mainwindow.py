@@ -3,12 +3,12 @@
 """
 Module implementing MainWindow.
 """
-import ctypes
 import os
+import platform
 import tempfile
 from xml.etree import ElementTree
 
-from PyQt4.QtGui import QMainWindow, QApplication, QImage, QPixmap, QSystemTrayIcon, QIcon, QListWidgetItem
+from PyQt4.QtGui import QMainWindow, QApplication, QImage, QPixmap, QSystemTrayIcon, QIcon
 from PyQt4.QtCore import pyqtSignature, pyqtSignal, Qt, QString, QDate, QTimer, QProcess, QUrl, QObject, QSize
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest
 
@@ -213,8 +213,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_status_text('Applying wallpaper...')
         temp_path = os.path.join(tempfile.gettempdir(), 'bing_wallpaper.jpg')
         self.preview_image.save(temp_path, quality=100)
-        SPI_SETDESKWALLPAPER = 20  # According to http://support.microsoft.com/default.aspx?scid=97142
-        ctypes.windll.user32.SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, temp_path, 1)
+
+        system_platform = platform.system()
+        if system_platform == 'Windows':
+            import ctypes
+            SPI_SETDESKWALLPAPER = 20  # According to http://support.microsoft.com/default.aspx?scid=97142
+            ctypes.windll.user32.SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, temp_path, 1)
+        elif system_platform == 'Linux':
+            file_url = QUrl.fromLocalFile(temp_path)
+            file_string = unicode(file_url.toString())
+            error = QProcess.execute('gsettings set org.gnome.desktop.background picture-uri ' + file_string)
+            if error:
+                self.system_tray_icon.showMessage('Error applying wallpaper',
+                                                  'The wallpaper could not be set.',
+                                                  QSystemTrayIcon.Critical)
+
         if self.cb_run_command.isChecked() and self.le_command.text():
             self.update_status_text('Running custom command...')
             error = QProcess.execute(self.le_command.text())
