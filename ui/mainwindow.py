@@ -21,7 +21,7 @@ class ImageDownloader(QObject):
 
     # Signals.
     download_finished = pyqtSignal(QImage, QDate, str)
-    thumbnail_download_finished = pyqtSignal(QImage, str, str)
+    thumbnail_download_finished = pyqtSignal(QImage, str, str, int)
     status_text = pyqtSignal(QString)
 
     def __init__(self, parent=None):
@@ -45,9 +45,9 @@ class ImageDownloader(QObject):
             request.setAttribute(QNetworkRequest.User, (request_type, request_metadata))
         self.manager.get(request)
 
-    def get_daily_wallpaper(self):
+    def get_full_wallpaper(self, day_index=0):
         self.status_text.emit('Checking for wallpaper update...')
-        xml_url = 'http://www.bing.com/HPImageArchive.aspx?format=xml&idx=0&n=1&mkt=en-ww'
+        xml_url = 'http://www.bing.com/HPImageArchive.aspx?format=xml&idx={}&n=1&mkt=en-ww'.format(day_index)
         self._get_url(xml_url, 0)
 
     def get_history_thumbs(self, day_index=0):
@@ -72,11 +72,12 @@ class ImageDownloader(QObject):
             self._get_url(image_url, 1, (start_date, copyright_info))
         else:
             for image_number in xrange(len(root) - 1):
+                image_day_index = image_number + day_index
                 url = 'http://www.bing.com' + root[image_number].find('url').text
                 date_string = str(QDate.fromString(root[image_number].find('startdate').text,
                                                    'yyyyMMdd').toString('dddd dd MMMM'))
                 copyright_info = root[image_number].find('copyright').text
-                self._get_url(url, 4, (date_string, copyright_info))
+                self._get_url(url, 4, (date_string, copyright_info, image_day_index))
 
     def reply_finished(self, reply):
         url = reply.url()
@@ -90,21 +91,19 @@ class ImageDownloader(QObject):
             attribute = reply.request().attribute(QNetworkRequest.User)
             if not attribute.isNull():
                 request_type, request_metadata = attribute.toPyObject()
-                if request_type == 0:
-                    # Daily wallpaper XML.
+                if request_type == 0:  # Daily wallpaper XML.
                     self.parse_daily_xml(data, True)
                 elif request_type == 1:
                     start_date, copyright_info = request_metadata
                     wallpaper_image = QImage.fromData(data)
                     self.download_finished.emit(wallpaper_image, start_date, copyright_info)
-                if request_type == 3:
-                    # Daily wallpaper XML.
+                if request_type == 3:  # History thumbnails.
                     day_index = request_metadata
                     self.parse_daily_xml(data, False, day_index)
                 elif request_type == 4:
-                    label, copyright_info = request_metadata
+                    label, copyright_info, image_day_index = request_metadata
                     wallpaper_image = QImage.fromData(data)
-                    self.thumbnail_download_finished.emit(wallpaper_image, label, copyright_info)
+                    self.thumbnail_download_finished.emit(wallpaper_image, label, copyright_info, image_day_index)
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -188,10 +187,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.button_refresh.setEnabled(True)
         self.lbl_status.setText('')
 
-    def thumbnail_download_finished(self, thumbnail_image, label, copyright_info):
+    def thumbnail_download_finished(self, thumbnail_image, label, copyright_info, image_day_index):
         icon = QIcon(QPixmap.fromImage(thumbnail_image.scaled(QSize(200, 200), Qt.KeepAspectRatio)))
         widget_item = ListWidgetItem(icon, label)
         widget_item.setToolTip(copyright_info)
+        widget_item.image_day_index = image_day_index
         self.lw_wallpaper_history.addItem(widget_item)
         self.lw_wallpaper_history.sortItems(Qt.AscendingOrder)
 
@@ -286,7 +286,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         print 'Refreshing...'
         self.image_downloader.set_resolution(str(self.cb_resolution.currentText()))
         self.button_refresh.setEnabled(False)
-        self.image_downloader.get_daily_wallpaper()
+        self.image_downloader.get_full_wallpaper()
 
     @pyqtSignature('int')
     def on_tabWidget_currentChanged(self, index):
@@ -297,3 +297,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             for day_index in [0, 8]:
                 self.image_downloader.get_history_thumbs(day_index)
 
+    @pyqtSignature('QListWidgetItem *')
+    def on_lw_wallpaper_history_itemDoubleClicked(self, item):
+        print 'Item with index {} clicked!'.format(item.image_day_index)
+        self.image_downloader.get_full_wallpaper(item.image_day_index)
