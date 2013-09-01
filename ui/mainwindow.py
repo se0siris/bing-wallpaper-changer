@@ -75,7 +75,6 @@ class ImageDownloader(QObject):
                 url = 'http://www.bing.com' + root[image_number].find('url').text
                 date_string = str(QDate.fromString(root[image_number].find('startdate').text,
                                                    'yyyyMMdd').toString('dddd dd MMMM'))
-                label = '{:02d} - {}'.format(image_number + 1 + day_index, date_string)
                 copyright_info = root[image_number].find('copyright').text
                 self._get_url(url, 4, (date_string, copyright_info))
 
@@ -295,6 +294,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             print 'History'
             self.lw_wallpaper_history.clear()
             self.lw_wallpaper_history.setIconSize(QSize(200, 200))
-            for day_index in [0, 8, 16]:
+            for day_index in [0, 8]:
                 self.image_downloader.get_history_thumbs(day_index)
 
