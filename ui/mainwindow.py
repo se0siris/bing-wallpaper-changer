@@ -236,6 +236,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                                   'the path.',
                                                   QSystemTrayIcon.Critical)
 
+        # Check for --quit command switch to see if we need to quit now that the wallpaper has been applied.
+        if self.app.args.quit:
+            print 'Closing application...'
+            self.app.quit()
+
     @pyqtSignature('int')
     def on_cb_resolution_currentIndexChanged(self, index):
         self.settings.set_image_resolution(index)
