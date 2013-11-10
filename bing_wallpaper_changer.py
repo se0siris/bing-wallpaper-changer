@@ -7,11 +7,11 @@ import argparse
 
 import sys
 
-from PyQt4.QtCore import QLocale
+from PyQt4.QtCore import QLocale, QSharedMemory
 from PyQt4.QtGui import QApplication, QStyleFactory, QIcon, QPixmap
 
 from ui.mainwindow import MainWindow
-from ui.message_boxes import message_box_ok
+from ui.message_boxes import message_box_ok, message_box_error
 
 
 VERSION = '1.4.0 - 27/10/2013'
@@ -50,6 +50,14 @@ def parse_arguments():
     return args
 
 
+def instance_check(app):
+    app.instance_check = QSharedMemory('Bing Wallpaper Changer - Shared Memory Check')
+    if not app.instance_check.create(10):
+        # Already running...
+        return False
+    return True
+
+
 def startmain():
     """
     Initialise the application and display the main window.
@@ -74,6 +82,12 @@ def startmain():
     # Add passed arguments to app.
     app.args = parse_arguments()
     print 'Args:', app.args
+
+    if not instance_check(app):
+        message_box_error('Program already running.',
+                          'You can only have one copy of the Bing Wallpaper Changer running at once.')
+        sys.exit()
+
 
     mainwindow = MainWindow()
     # mainwindow.show()
