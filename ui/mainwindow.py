@@ -34,7 +34,9 @@ class ImageDownloader(QObject):
     def set_resolution(self, resolution):
         """
         Set the image resolution.
-        :param resolution: 1024x768, 1280x720, 1366x768, 1920x1200
+
+        @param resolution: 1024x768, 1280x720, 1366x768, 1920x1200
+        @type: str
         """
         self.resolution = resolution
 
@@ -145,10 +147,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.refresh_timer.start()
 
     def resizeEvent(self, event):
+        """
+        @type event: QEvent
+        """
         QMainWindow.resizeEvent(self, event)
         self.update_preview_size()
 
     def closeEvent(self, event):
+        """
+        @type event: QEvent
+        """
         if self.sender() is self.system_tray_icon.exit_action:
             QMainWindow.closeEvent(self, event)
         else:
@@ -156,6 +164,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.setVisible(False)
 
     def update_status_text(self, text):
+        """
+        @type text: str
+        """
         self.lbl_status.setText(text)
         self.app.processEvents()
 
@@ -176,6 +187,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.update_preview_size()
 
     def download_finished(self, wallpaper_image, start_date, copyright_info):
+        """
+        @type wallpaper_image: QImage
+        @type start_date: QDate
+        @type copyright_info: str
+        """
         if not wallpaper_image.isNull():
             self.preview_image = wallpaper_image
             self.update_preview_size()
@@ -188,6 +204,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lbl_status.setText('')
 
     def thumbnail_download_finished(self, thumbnail_image, label, copyright_info, image_day_index):
+        """
+        @type thumbnail_image: QImage
+        @type label: str
+        @type copyright_info: str
+        @type image_day_index: int
+        """
         icon = QIcon(QPixmap.fromImage(thumbnail_image.scaled(QSize(200, 200), Qt.KeepAspectRatio)))
         widget_item = ListWidgetItem(icon, label)
         widget_item.setToolTip(copyright_info)

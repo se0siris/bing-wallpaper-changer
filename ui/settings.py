@@ -10,6 +10,8 @@ class Settings(object):
     Wrapper for the settings file to get/set values.
     """
 
+    # TODO: Look into using properties to make this nicer.
+
     # Retrieve values.
 
     def __init__(self):
