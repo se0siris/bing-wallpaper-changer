@@ -94,7 +94,7 @@ def startmain():
     QApplication.setApplicationName('Bing Wallpaper Changer')
     QApplication.setApplicationVersion(VERSION)
     QApplication.setOrganizationName('overThere.co.uk')
-    QApplication.setWindowIcon(QIcon(QPixmap(':/icons/ui/ot_icon.png')))
+    QApplication.setWindowIcon(QIcon(QPixmap(':/icons/ui/ot_icon.svg')))
 
     print 'AppName: %s' % QApplication.applicationName()
     print 'AppVersion: %s' % QApplication.applicationVersion()
