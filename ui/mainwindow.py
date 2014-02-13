@@ -132,7 +132,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.settings = Settings()
         self.load_settings()
 
-        self.system_tray_icon = SystemTrayIcon(self.app.windowIcon(), self)
+        if platform.system() == 'Linux':
+            white_icon = QIcon(':/icons/ui/ot_icon_white.svg')
+            self.system_tray_icon = SystemTrayIcon(white_icon, self)
+        else:
+            self.system_tray_icon = SystemTrayIcon(self.app.windowIcon(), self)
         self.system_tray_icon.activated.connect(self.system_tray_icon_activated)
         self.system_tray_icon.show()
 
