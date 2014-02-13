@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../rec.qrc">
-    <normaloff>:/icons/ui/ot_icon.png</normaloff>:/icons/ui/ot_icon.png</iconset>
+    <normaloff>:/icons/ui/ot_icon.svg</normaloff>:/icons/ui/ot_icon.svg</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -297,6 +297,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
          <widget class="QListWidget" name="lw_wallpaper_history">
+          <property name="dragDropMode">
+           <enum>QAbstractItemView::NoDragDrop</enum>
+          </property>
           <property name="movement">
            <enum>QListView::Static</enum>
           </property>

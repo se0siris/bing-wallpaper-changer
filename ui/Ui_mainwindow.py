@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\dev\Python\Bing Wallpaper Changer\ui\mainwindow.ui'
+# Form implementation generated from reading ui file 'S:\dev\Python\Bing Wallpaper Changer\ui\mainwindow.ui'
 #
-# Created: Wed Feb 27 16:00:26 2013
+# Created: Fri Apr 26 09:04:06 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -28,7 +28,7 @@ class Ui_MainWindow(object):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.resize(717, 373)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/ui/ot_icon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/ui/ot_icon.svg")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
         self.centralWidget = QtGui.QWidget(MainWindow)
         self.centralWidget.setObjectName(_fromUtf8("centralWidget"))
@@ -139,6 +139,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.tab_history)
         self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
         self.lw_wallpaper_history = QtGui.QListWidget(self.tab_history)
+        self.lw_wallpaper_history.setDragDropMode(QtGui.QAbstractItemView.NoDragDrop)
         self.lw_wallpaper_history.setMovement(QtGui.QListView.Static)
         self.lw_wallpaper_history.setResizeMode(QtGui.QListView.Adjust)
         self.lw_wallpaper_history.setSpacing(5)
@@ -155,7 +156,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
         self.label_4 = QtGui.QLabel(self.tab_about)
         self.label_4.setText(_fromUtf8(""))
-        self.label_4.setPixmap(QtGui.QPixmap(_fromUtf8(":/icons/ui/ot_icon.png")))
+        self.label_4.setPixmap(QtGui.QPixmap(_fromUtf8(":/icons/ui/ot_icon.svg")))
         self.label_4.setAlignment(QtCore.Qt.AlignCenter)
         self.label_4.setObjectName(_fromUtf8("label_4"))
         self.horizontalLayout_5.addWidget(self.label_4)
