@@ -14,6 +14,12 @@ After not being able to find a similar program with the features I wanted I deci
 
 ### Changelog ###
 
+##### 1.5 #####
+  - Ability to save images to a custom folder.
+
+##### 1.4 #####
+  - Command line switches for closing after applying wallpaper (--quit).
+
 ##### 1.3 #####
   - Added ability to set old Bing wallpapers from the ``History`` tab by double clicking the thumbnail.
   - Reduced ``History`` tab range from three weeks to two as duplicates were shown when Bing had featured interactive images on the homepage.
