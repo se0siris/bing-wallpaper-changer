@@ -1,7 +1,7 @@
 <RCC>
   <qresource prefix="icons">
     <file>ui/ot_icon_white.svg</file>
+    <file>ui/drive-harddisk.svg</file>
     <file>ui/ot_icon.svg</file>
-    <file>ui/ot_icon.png</file>
   </qresource>
 </RCC>

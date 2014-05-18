@@ -4,7 +4,16 @@ from PyQt4.QtGui import QLabel, QSystemTrayIcon, QMenu, QApplication, QListWidge
 __author__ = 'Gary'
 
 
+def text_to_date(text):
+    text = '{} {}'.format(str(text), str(QDate.currentDate().year()))
+    return QDate.fromString(text, 'dddd dd MMMM yyyy')
+
+
 class ImageLabel(QLabel):
+    """
+    Custom label with hardcoded sizeHint() to prevent weird resizing issues.
+    """
+
     def sizeHint(self):
         return QSize(0, 0)
 
@@ -32,39 +41,23 @@ class SystemTrayIcon(QSystemTrayIcon):
 
 class ListWidgetItem(QListWidgetItem):
     """
-    Custom QListWidgetItem to provide custom sorting for items with a text date.
+    Custom QListWidgetItem to provide custom sorting for items with a QDate.
     """
 
-    def _text_to_date(self, text):
-        text = str(text) + ' ' + str(QDate.currentDate().year())
-        return QDate.fromString(text, 'dddd dd MMMM yyyy')
-
     def __le__(self, b):
-        self_date = self._text_to_date(self.text())
-        b_date = self._text_to_date(b.text())
-        return b_date <= self_date
+        return b.image_date <= self.image_date
 
     def __lt__(self, b):
-        self_date = self._text_to_date(self.text())
-        b_date = self._text_to_date(b.text())
-        return b_date < self_date
+        return b.image_date < self.image_date
 
     def __gt__(self, b):
-        self_date = self._text_to_date(self.text())
-        b_date = self._text_to_date(b.text())
-        return b_date > self_date
+        return b.image_date > self.image_date
 
     def __ge__(self, b):
-        self_date = self._text_to_date(self.text())
-        b_date = self._text_to_date(b.text())
-        return b_date >= self_date
+        return b.image_date >= self.image_date
 
     def __eq__(self, b):
-        self_date = self._text_to_date(self.text())
-        b_date = self._text_to_date(b.text())
-        return b_date == self_date
+        return b.image_date == self.image_date
 
     def __ne__(self, b):
-        self_date = self._text_to_date(self.text())
-        b_date = self._text_to_date(b.text())
-        return b_date != self_date
+        return b.image_date != self.image_date

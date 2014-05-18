@@ -7,21 +7,26 @@ import os
 import platform
 import tempfile
 from xml.etree import ElementTree
+import re
 
-from PyQt4.QtGui import QMainWindow, QApplication, QImage, QPixmap, QSystemTrayIcon, QIcon
-from PyQt4.QtCore import pyqtSignature, pyqtSignal, Qt, QString, QDate, QTimer, QProcess, QUrl, QObject, QSize
+from PyQt4.QtGui import QMainWindow, QApplication, QImage, QPixmap, QSystemTrayIcon, QIcon, QFileDialog, QPainter
+from PyQt4.QtCore import pyqtSignature, pyqtSignal, Qt, QString, QDate, QTimer, QProcess, QUrl, QObject, QSize, QRect
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest
 
 from Ui_mainwindow import Ui_MainWindow
 from ui.custom_widgets import SystemTrayIcon, ListWidgetItem
+from ui.databases import CopyrightDatabase
 from ui.settings import Settings
+
+
+re_archive_file = re.compile(r'[0-9]{8}\.jpg')
 
 
 class ImageDownloader(QObject):
 
     # Signals.
     download_finished = pyqtSignal(QImage, QDate, str)
-    thumbnail_download_finished = pyqtSignal(QImage, str, str, int)
+    thumbnail_download_finished = pyqtSignal(QImage, QDate, str, int)
     status_text = pyqtSignal(QString)
 
     def __init__(self, parent=None):
@@ -76,10 +81,9 @@ class ImageDownloader(QObject):
             for image_number in xrange(len(root) - 1):
                 image_day_index = image_number + day_index
                 url = 'http://www.bing.com' + root[image_number].find('url').text
-                date_string = str(QDate.fromString(root[image_number].find('startdate').text,
-                                                   'yyyyMMdd').toString('dddd dd MMMM'))
+                image_date = QDate.fromString(root[image_number].find('startdate').text, 'yyyyMMdd')
                 copyright_info = root[image_number].find('copyright').text
-                self._get_url(url, 4, (date_string, copyright_info, image_day_index))
+                self._get_url(url, 4, (image_date, copyright_info, image_day_index))
 
     def reply_finished(self, reply):
         url = reply.url()
@@ -103,9 +107,9 @@ class ImageDownloader(QObject):
                     day_index = request_metadata
                     self.parse_daily_xml(data, False, day_index)
                 elif request_type == 4:
-                    label, copyright_info, image_day_index = request_metadata
+                    image_date, copyright_info, image_day_index = request_metadata
                     wallpaper_image = QImage.fromData(data)
-                    self.thumbnail_download_finished.emit(wallpaper_image, label, copyright_info, image_day_index)
+                    self.thumbnail_download_finished.emit(wallpaper_image, image_date, copyright_info, image_day_index)
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -132,6 +136,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.settings = Settings()
         self.load_settings()
 
+        self.copyright_db = CopyrightDatabase()
+
         if platform.system() == 'Linux':
             white_icon = QIcon(':/icons/ui/ot_icon_white.svg')
             self.system_tray_icon = SystemTrayIcon(white_icon, self)
@@ -149,6 +155,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.refresh_timer.timeout.connect(self.on_button_refresh_released)
         if self.cb_auto_update.isChecked():
             self.refresh_timer.start()
+
+        # for path, copyright in self.archive_wallpapers():
+        #     print path, unicode(copyright)
 
     def resizeEvent(self, event):
         """
@@ -175,14 +184,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.app.processEvents()
 
     def load_settings(self):
-        self.cb_resolution.setCurrentIndex(self.settings.get_image_resolution())
+        self.cb_resolution.setCurrentIndex(self.settings.image_resolution)
 
-        self.sb_update_interval.setValue(self.settings.get_auto_update_interval() / 60000)
+        self.sb_update_interval.setValue(self.settings.auto_update_interval / 60000)
         self.on_sb_update_interval_valueChanged(self.sb_update_interval.value())
-        self.cb_auto_update.setChecked(self.settings.get_auto_update_enabled())
+        self.cb_auto_update.setChecked(self.settings.auto_update_enabled)
 
-        self.cb_run_command.setChecked(self.settings.get_run_command_enabled())
-        self.le_command.setText(self.settings.get_run_command_command())
+        self.cb_run_command.setChecked(self.settings.run_command_enabled)
+        self.le_command.setText(self.settings.run_command_command)
+
+        self.cb_enable_archive.setChecked(self.settings.archive_enabled)
+        self.le_archive_location.setText(self.settings.archive_location)
 
     def system_tray_icon_activated(self, reason):
         if reason == QSystemTrayIcon.DoubleClick:
@@ -204,20 +216,43 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.system_tray_icon.setToolTip(QString('%1\n%2').arg(self.app.applicationName(), copyright_info))
             self.app.processEvents()
             self.apply_wallpaper()
+            self.copyright_db.set_info(start_date, copyright_info)
+            if self.settings.archive_enabled:
+                self.save_wallpaper(wallpaper_image, start_date)
         self.button_refresh.setEnabled(True)
         self.lbl_status.setText('')
 
-    def thumbnail_download_finished(self, thumbnail_image, label, copyright_info, image_day_index):
+    def thumbnail_download_finished(self, thumbnail_image, image_date, copyright_info, image_day_index):
         """
         @type thumbnail_image: QImage
         @type label: str
         @type copyright_info: str
         @type image_day_index: int
         """
-        icon = QIcon(QPixmap.fromImage(thumbnail_image.scaled(QSize(200, 200), Qt.KeepAspectRatio)))
+        pixmap = QPixmap.fromImage(thumbnail_image.scaled(QSize(200, 200), Qt.KeepAspectRatio))
+        archive_path = self.get_archive_path(image_date)
+        if os.path.isfile(archive_path):
+            painter = QPainter(pixmap)
+            painter.setRenderHint(QPainter.Antialiasing)
+            circle_area = QRect(pixmap.width() - 35, pixmap.height() - 35, 25, 25)
+            painter.setOpacity(0.7)
+            painter.setPen(Qt.lightGray)
+            painter.setBrush(Qt.lightGray)
+            painter.drawEllipse(circle_area)
+            pixmap_hd = QPixmap(':/icons/ui/drive-harddisk.svg').scaledToWidth(25, Qt.SmoothTransformation)
+            painter.drawPixmap(circle_area.topLeft(), pixmap_hd)
+            painter.end()
+        else:
+            archive_path = None
+
+        label = str(image_date.toString('dddd dd MMMM'))
+
+        icon = QIcon(pixmap)
         widget_item = ListWidgetItem(icon, label)
         widget_item.setToolTip(copyright_info)
         widget_item.image_day_index = image_day_index
+        widget_item.archive_path = archive_path
+        widget_item.image_date = image_date
         self.lw_wallpaper_history.addItem(widget_item)
         self.lw_wallpaper_history.sortItems(Qt.AscendingOrder)
 
@@ -267,14 +302,45 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             print 'Closing application...'
             self.app.quit()
 
+    def get_archive_path(self, image_date):
+        output_filename = u'{0:s}.jpg'.format(image_date.toString('yyyyMMdd'))
+        output_path = os.path.join(unicode(self.settings.archive_location), output_filename)
+        return output_path
+
+    def save_wallpaper(self, image, image_date):
+        """
+        Save image to archive folder.
+
+        :type image: QImage
+        :type image_date: QDate
+        """
+        output_path = self.get_archive_path(image_date)
+        image.save(output_path)
+
+    def archive_wallpapers(self):
+        """
+        Generator returning the date, path and copyright info (via db lookup) of each file found in the
+        archive location.
+
+        :rtype: QDate, unicode, unicode
+        """
+        archive_folder = self.settings.archive_location
+        for filename in (x for x in os.listdir(archive_folder) if re_archive_file.match(x)):
+            year = int(filename[:4])
+            month = int(filename[4:6])
+            day = int(filename[6:8])
+            wallpaper_date = QDate(year, month, day)
+            wallpaper_copyright = self.copyright_db.get_info(wallpaper_date)
+            yield wallpaper_date, os.path.join(unicode(archive_folder), filename), wallpaper_copyright
+
     @pyqtSignature('int')
     def on_cb_resolution_currentIndexChanged(self, index):
-        self.settings.set_image_resolution(index)
+        self.settings.image_resolution = index
         self.image_downloader.set_resolution(str(self.cb_resolution.currentText()))
 
     @pyqtSignature('bool')
     def on_cb_auto_update_toggled(self, enabled):
-        self.settings.set_auto_update_enabled(enabled)
+        self.settings.auto_update_enabled =enabled
         if enabled:
             self.refresh_timer.start()
         else:
@@ -288,7 +354,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.sb_update_interval.setSuffix(' minutes')
         interval = minutes * 60000
-        self.settings.set_auto_update_interval(interval)
+        self.settings.auto_update_interval = interval
         self.refresh_timer.stop()
         self.refresh_timer.setInterval(interval)
         if self.cb_auto_update.isChecked():
@@ -296,11 +362,30 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @pyqtSignature('bool')
     def on_cb_run_command_toggled(self, enabled):
-        self.settings.set_run_command_enabled(enabled)
+        self.settings.run_command_enabled = enabled
 
     @pyqtSignature('QString')
     def on_le_command_textEdited(self, text):
-        self.settings.set_run_command_command(text)
+        self.settings.run_command_command = text
+
+    @pyqtSignature('bool')
+    def on_cb_enable_archive_toggled(self, enabled):
+        self.settings.archive_enabled = enabled
+
+    @pyqtSignature('')
+    def on_button_archive_browse_released(self):
+        path = QFileDialog.getExistingDirectory(None, 'Select archive location')
+        if not path or not os.path.isdir(path):
+            return
+
+        self.le_archive_location.setText(path)
+        self.on_le_archive_location_textEdited(path)
+
+    @pyqtSignature('QString')
+    def on_le_archive_location_textEdited(self, text):
+        if not text or not os.path.isdir(text):
+            return
+        self.settings.archive_location = text
 
     @pyqtSignature('')
     def on_button_close_released(self):
