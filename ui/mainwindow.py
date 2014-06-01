@@ -9,12 +9,12 @@ import tempfile
 from xml.etree import ElementTree
 import re
 
-from PyQt4.QtGui import QMainWindow, QApplication, QImage, QPixmap, QSystemTrayIcon, QIcon, QFileDialog, QPainter
-from PyQt4.QtCore import pyqtSignature, pyqtSignal, Qt, QString, QDate, QTimer, QProcess, QUrl, QObject, QSize, QRect
+from PyQt4.QtGui import QMainWindow, QApplication, QImage, QPixmap, QSystemTrayIcon, QIcon, QFileDialog
+from PyQt4.QtCore import pyqtSignature, pyqtSignal, Qt, QString, QDate, QTimer, QProcess, QUrl, QObject, QSize
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest
 
 from Ui_mainwindow import Ui_MainWindow
-from ui.custom_widgets import SystemTrayIcon, ListWidgetItem
+from ui.custom_widgets import SystemTrayIcon
 from ui.databases import CopyrightDatabase
 from ui.settings import Settings
 
@@ -229,32 +229,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         @type copyright_info: str
         @type image_day_index: int
         """
-        pixmap = QPixmap.fromImage(thumbnail_image.scaled(QSize(200, 200), Qt.KeepAspectRatio))
         archive_path = self.get_archive_path(image_date)
-        if os.path.isfile(archive_path):
-            painter = QPainter(pixmap)
-            painter.setRenderHint(QPainter.Antialiasing)
-            circle_area = QRect(pixmap.width() - 35, pixmap.height() - 35, 25, 25)
-            painter.setOpacity(0.7)
-            painter.setPen(Qt.lightGray)
-            painter.setBrush(Qt.lightGray)
-            painter.drawEllipse(circle_area)
-            pixmap_hd = QPixmap(':/icons/ui/drive-harddisk.svg').scaledToWidth(25, Qt.SmoothTransformation)
-            painter.drawPixmap(circle_area.topLeft(), pixmap_hd)
-            painter.end()
-        else:
+        if not os.path.isfile(archive_path):
             archive_path = None
-
-        label = str(image_date.toString('dddd dd MMMM'))
-
-        icon = QIcon(pixmap)
-        widget_item = ListWidgetItem(icon, label)
-        widget_item.setToolTip(copyright_info)
-        widget_item.image_day_index = image_day_index
-        widget_item.archive_path = archive_path
-        widget_item.image_date = image_date
-        self.lw_wallpaper_history.addItem(widget_item)
-        self.lw_wallpaper_history.sortItems(Qt.AscendingOrder)
+        self.lw_wallpaper_history.add_item(thumbnail_image, image_date, copyright_info, image_day_index, archive_path)
 
     def update_preview_size(self):
         if self.preview_image.isNull():
@@ -410,7 +388,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             print 'History'
             self.lw_wallpaper_history.clear()
             self.lw_wallpaper_history.setIconSize(QSize(200, 200))
-            for day_index in [0, 8]:
+            for day_index in [0, 8, 16]:
                 self.image_downloader.get_history_thumbs(day_index)
 
     @pyqtSignature('QListWidgetItem *')

@@ -1,5 +1,6 @@
-from PyQt4.QtCore import QSize, QDate
-from PyQt4.QtGui import QLabel, QSystemTrayIcon, QMenu, QApplication, QListWidgetItem
+from PyQt4.QtCore import QSize, QDate, Qt, QRect
+from PyQt4.QtGui import QLabel, QSystemTrayIcon, QMenu, QApplication, QListWidgetItem, QListWidget, QPixmap, QPainter, \
+    QIcon
 
 __author__ = 'Gary'
 
@@ -61,3 +62,60 @@ class ListWidgetItem(QListWidgetItem):
 
     def __ne__(self, b):
         return b.image_date != self.image_date
+
+
+class ListWidget(QListWidget):
+
+    def __init__(self, parent=None):
+        super(ListWidget, self).__init__(parent)
+        self.added_dates = set()
+
+    def clear(self):
+        """
+        Subclassed clear() method to also clear the self.added_dates set.
+        """
+        super(ListWidget, self).clear()
+        self.added_dates.clear()
+
+    # thumbnail_image, image_date, copyright_info, image_day_index
+    def add_item(self, thumbnail_image, date, info, day_index, archive_path=None):
+        """
+
+        @param thumbnail_image: Image to be used in thumbnail
+        @param date: Date of image
+        @param info: Copyright info for image
+        @param day_index: Day index of image
+        @param archive_path: Path to the local file, or None if image source is the RSS feed.
+
+        @type thumbnail_image: QImage
+        @type date: QDate
+        @type info: str
+        @type day_index: int
+        @type archive_path: str or None
+        """
+        date_label = str(date.toString('dddd dd MMMM'))
+        if date_label in self.added_dates:
+            # This date has already been added. Don't bother adding it again.
+            return
+        pixmap = QPixmap.fromImage(thumbnail_image.scaled(QSize(200, 200), Qt.KeepAspectRatio))
+        if archive_path:
+            painter = QPainter(pixmap)
+            painter.setRenderHint(QPainter.Antialiasing)
+            circle_area = QRect(pixmap.width() - 35, pixmap.height() - 35, 25, 25)
+            painter.setOpacity(0.7)
+            painter.setPen(Qt.lightGray)
+            painter.setBrush(Qt.lightGray)
+            painter.drawEllipse(circle_area)
+            pixmap_hd = QPixmap(':/icons/ui/drive-harddisk.svg').scaledToWidth(25, Qt.SmoothTransformation)
+            painter.drawPixmap(circle_area.topLeft(), pixmap_hd)
+            painter.end()
+
+        icon = QIcon(pixmap)
+        widget_item = ListWidgetItem(icon, date_label)
+        widget_item.setToolTip(info)
+        widget_item.image_day_index = day_index
+        widget_item.archive_path = archive_path
+        widget_item.image_date = date
+        self.addItem(widget_item)
+        self.added_dates.add(date_label)
+        self.sortItems(Qt.AscendingOrder)
