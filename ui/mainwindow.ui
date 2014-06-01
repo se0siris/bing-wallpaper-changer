@@ -383,7 +383,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <widget class="QListWidget" name="lw_wallpaper_history">
+         <widget class="ListWidget" name="lw_wallpaper_history">
           <property name="dragDropMode">
            <enum>QAbstractItemView::NoDragDrop</enum>
           </property>
@@ -563,6 +563,11 @@
   <customwidget>
    <class>ImageLabel</class>
    <extends>QLabel</extends>
+   <header>custom_widgets</header>
+  </customwidget>
+  <customwidget>
+   <class>ListWidget</class>
+   <extends>QListWidget</extends>
    <header>custom_widgets</header>
   </customwidget>
  </customwidgets>

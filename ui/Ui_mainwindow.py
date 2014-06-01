@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'C:\dev\Python\Bing Wallpaper Changer\ui\mainwindow.ui'
 #
-# Created: Sun May 18 20:51:08 2014
+# Created: Sun Jun 01 16:32:20 2014
 #      by: PyQt4 UI code generator 4.9.5
 #
 # WARNING! All changes made in this file will be lost!
@@ -151,7 +151,7 @@ class Ui_MainWindow(object):
         self.tab_history.setObjectName(_fromUtf8("tab_history"))
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.tab_history)
         self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
-        self.lw_wallpaper_history = QtGui.QListWidget(self.tab_history)
+        self.lw_wallpaper_history = ListWidget(self.tab_history)
         self.lw_wallpaper_history.setDragDropMode(QtGui.QAbstractItemView.NoDragDrop)
         self.lw_wallpaper_history.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
         self.lw_wallpaper_history.setHorizontalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
@@ -277,5 +277,5 @@ class Ui_MainWindow(object):
         self.button_close.setText(QtGui.QApplication.translate("MainWindow", "Close", None, QtGui.QApplication.UnicodeUTF8))
         self.actionDelete_Files.setText(QtGui.QApplication.translate("MainWindow", "Delete Files", None, QtGui.QApplication.UnicodeUTF8))
 
-from custom_widgets import ImageLabel
+from custom_widgets import ImageLabel, ListWidget
 import rec_rc
