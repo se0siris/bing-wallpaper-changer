@@ -16,6 +16,7 @@ After not being able to find a similar program with the features I wanted I deci
 
 ##### 1.5 #####
   - Ability to save images to a custom folder.
+  - Increased `History` tab range back up to 3 weeks; duplicate dates will be ignored.
 
 ##### 1.4 #####
   - Command line switches for closing after applying wallpaper (--quit).

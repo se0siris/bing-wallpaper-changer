@@ -77,8 +77,7 @@ class ListWidget(QListWidget):
         super(ListWidget, self).clear()
         self.added_dates.clear()
 
-    # thumbnail_image, image_date, copyright_info, image_day_index
-    def add_item(self, thumbnail_image, date, info, day_index, archive_path=None):
+    def add_item(self, thumbnail_image, date, info, day_index=-1, archive_path=None):
         """
 
         @param thumbnail_image: Image to be used in thumbnail
@@ -91,13 +90,14 @@ class ListWidget(QListWidget):
         @type date: QDate
         @type info: str
         @type day_index: int
-        @type archive_path: str or None
+        @type archive_path: unicode or None
         """
         date_label = str(date.toString('dddd dd MMMM'))
         if date_label in self.added_dates:
             # This date has already been added. Don't bother adding it again.
+            print 'Ignored', date_label
             return
-        pixmap = QPixmap.fromImage(thumbnail_image.scaled(QSize(200, 200), Qt.KeepAspectRatio))
+        pixmap = QPixmap.fromImage(thumbnail_image.scaled(QSize(200, 125), Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
         if archive_path:
             painter = QPainter(pixmap)
             painter.setRenderHint(QPainter.Antialiasing)

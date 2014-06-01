@@ -9,7 +9,7 @@ import tempfile
 from xml.etree import ElementTree
 import re
 
-from PyQt4.QtGui import QMainWindow, QApplication, QImage, QPixmap, QSystemTrayIcon, QIcon, QFileDialog
+from PyQt4.QtGui import QMainWindow, QApplication, QImage, QPixmap, QSystemTrayIcon, QIcon, QFileDialog, QImageReader
 from PyQt4.QtCore import pyqtSignature, pyqtSignal, Qt, QString, QDate, QTimer, QProcess, QUrl, QObject, QSize
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest
 
@@ -23,7 +23,6 @@ re_archive_file = re.compile(r'[0-9]{8}\.jpg')
 
 
 class ImageDownloader(QObject):
-
     # Signals.
     download_finished = pyqtSignal(QImage, QDate, str)
     thumbnail_download_finished = pyqtSignal(QImage, QDate, str, int)
@@ -156,9 +155,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.cb_auto_update.isChecked():
             self.refresh_timer.start()
 
-        # for path, copyright in self.archive_wallpapers():
-        #     print path, unicode(copyright)
-
     def resizeEvent(self, event):
         """
         @type event: QEvent
@@ -255,6 +251,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         system_platform = platform.system()
         if system_platform == 'Windows':
             import ctypes
+
             SPI_SETDESKWALLPAPER = 20  # According to http://support.microsoft.com/default.aspx?scid=97142
             ctypes.windll.user32.SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, temp_path, 1)
         elif system_platform == 'Linux':
@@ -295,13 +292,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         output_path = self.get_archive_path(image_date)
         image.save(output_path)
 
-    def archive_wallpapers(self):
+    def get_archive_wallpapers(self):
         """
         Generator returning the date, path and copyright info (via db lookup) of each file found in the
         archive location.
 
         :rtype: QDate, unicode, unicode
         """
+        image_reader = QImageReader()
+
         archive_folder = self.settings.archive_location
         for filename in (x for x in os.listdir(archive_folder) if re_archive_file.match(x)):
             year = int(filename[:4])
@@ -309,7 +308,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             day = int(filename[6:8])
             wallpaper_date = QDate(year, month, day)
             wallpaper_copyright = self.copyright_db.get_info(wallpaper_date)
-            yield wallpaper_date, os.path.join(unicode(archive_folder), filename), wallpaper_copyright
+            wallpaper_filename = os.path.join(unicode(archive_folder), filename)
+
+            image_reader.setFileName(wallpaper_filename)
+            image_size = image_reader.size()
+            image_size.scale(QSize(200, 200), Qt.KeepAspectRatio)
+            image_reader.setScaledSize(image_size)
+            thumbnail_image = image_reader.read()
+            if thumbnail_image.isNull():
+                continue
+            self.lw_wallpaper_history.add_item(thumbnail_image, wallpaper_date, wallpaper_copyright,
+                                               archive_path=wallpaper_filename)
+            self.app.processEvents()
+
+        for day_index in [0, 8, 16]:
+            self.image_downloader.get_history_thumbs(day_index)
 
     @pyqtSignature('int')
     def on_cb_resolution_currentIndexChanged(self, index):
@@ -318,7 +331,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @pyqtSignature('bool')
     def on_cb_auto_update_toggled(self, enabled):
-        self.settings.auto_update_enabled =enabled
+        self.settings.auto_update_enabled = enabled
         if enabled:
             self.refresh_timer.start()
         else:
@@ -388,8 +401,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             print 'History'
             self.lw_wallpaper_history.clear()
             self.lw_wallpaper_history.setIconSize(QSize(200, 200))
-            for day_index in [0, 8, 16]:
-                self.image_downloader.get_history_thumbs(day_index)
+            self.get_archive_wallpapers()
 
     @pyqtSignature('QListWidgetItem *')
     def on_lw_wallpaper_history_itemDoubleClicked(self, item):
