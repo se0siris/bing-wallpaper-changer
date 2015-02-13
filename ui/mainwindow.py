@@ -17,6 +17,7 @@ from Ui_mainwindow import Ui_MainWindow
 from ui.custom_widgets import SystemTrayIcon
 from ui.databases import CopyrightDatabase
 from ui.settings import Settings
+from ui.wallpaper_changer import WallpaperChanger
 
 
 re_archive_file = re.compile(r'[0-9]{8}\.jpg')
@@ -135,8 +136,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.settings = Settings()
         self.load_settings()
 
+        self.changer = WallpaperChanger()
         self.copyright_db = CopyrightDatabase()
 
+        # TODO: Add a dark/light icon selector in settings.
         if platform.system() == 'Linux':
             white_icon = QIcon(':/icons/ui/ot_icon_white.svg')
             self.system_tray_icon = SystemTrayIcon(white_icon, self)
@@ -247,21 +250,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.update_status_text('Applying wallpaper...')
         temp_path = os.path.join(tempfile.gettempdir(), 'bing_wallpaper.jpg')
         self.preview_image.save(temp_path, quality=100)
-
-        system_platform = platform.system()
-        if system_platform == 'Windows':
-            import ctypes
-
-            SPI_SETDESKWALLPAPER = 20  # According to http://support.microsoft.com/default.aspx?scid=97142
-            ctypes.windll.user32.SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, temp_path, 1)
-        elif system_platform == 'Linux':
-            file_url = QUrl.fromLocalFile(temp_path)
-            file_string = unicode(file_url.toString())
-            error = QProcess.execute('gsettings set org.gnome.desktop.background picture-uri ' + file_string)
-            if error:
-                self.system_tray_icon.showMessage('Error applying wallpaper',
-                                                  'The wallpaper could not be set.',
-                                                  QSystemTrayIcon.Critical)
+        self.changer.apply_wallpaper(temp_path)
 
         if self.cb_run_command.isChecked() and self.le_command.text():
             self.update_status_text('Running custom command...')

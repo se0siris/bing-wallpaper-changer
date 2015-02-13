@@ -101,3 +101,11 @@ class Settings(object):
         :type command_string: str
         """
         self.settings.setValue('Archive/location', command_string)
+
+    @property
+    def linux_desktop(self):
+        return self.settings.value('Linux/desktop', QVariant('unity')).toString()
+
+    @linux_desktop.setter
+    def linux_desktop(self, value):
+        self.settings.setValue('Linux/desktop', value)
