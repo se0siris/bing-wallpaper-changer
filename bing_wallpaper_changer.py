@@ -109,6 +109,7 @@ def startmain():
     # Check to see if application already running.
     existing_pid = instance_check(app)
     if existing_pid:
+        print existing_pid
         if app.args.quit_existing:
             # Command line argument passed to close existing program. Do that, then quit.
             if platform.system() == "Windows":
