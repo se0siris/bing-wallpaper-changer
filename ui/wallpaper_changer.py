@@ -33,7 +33,7 @@ class WallpaperChanger(object):
         ctypes.windll.user32.SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, filepath, 1)
 
     def _feh(self, filepath):
-        error = self.process.execute('feh --bg-scale {0:s)'.format(filepath))
+        error = self.process.execute('feh --bg-scale {0:s}'.format(filepath))
         return not bool(error)
 
     def _unity(self, filepath):
