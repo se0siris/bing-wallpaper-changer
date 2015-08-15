@@ -204,6 +204,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.cb_enable_archive.setChecked(self.settings.archive_enabled)
         self.le_archive_location.setText(self.settings.archive_location)
 
+        if self.settings.icon_colour == 0:
+            self.rb_icon_colour_black.setChecked(True)
+        else:
+            self.rb_icon_colour_white.setChecked(True)
+
     def system_tray_icon_activated(self, reason):
         if reason == QSystemTrayIcon.DoubleClick:
             self.show()
