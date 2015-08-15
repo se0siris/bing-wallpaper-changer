@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'C:\dev\Python\Bing Wallpaper Changer\ui\mainwindow.ui'
 #
-# Created: Sun Jun 01 16:32:20 2014
-#      by: PyQt4 UI code generator 4.9.5
+# Created: Sat Aug 15 17:04:52 2015
+#      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,12 +12,21 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(717, 373)
+        MainWindow.resize(717, 385)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/ui/ot_icon.svg")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
@@ -144,8 +153,30 @@ class Ui_MainWindow(object):
         self.button_archive_browse.setObjectName(_fromUtf8("button_archive_browse"))
         self.horizontalLayout_6.addWidget(self.button_archive_browse)
         self.verticalLayout_3.addLayout(self.horizontalLayout_6)
-        spacerItem7 = QtGui.QSpacerItem(20, 226, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem7 = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
         self.verticalLayout_3.addItem(spacerItem7)
+        self.verticalLayout_7 = QtGui.QVBoxLayout()
+        self.verticalLayout_7.setObjectName(_fromUtf8("verticalLayout_7"))
+        self.label_9 = QtGui.QLabel(self.tab_settings)
+        self.label_9.setObjectName(_fromUtf8("label_9"))
+        self.verticalLayout_7.addWidget(self.label_9)
+        self.horizontalLayout_7 = QtGui.QHBoxLayout()
+        self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
+        spacerItem8 = QtGui.QSpacerItem(25, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_7.addItem(spacerItem8)
+        self.rb_icon_colour_black = QtGui.QRadioButton(self.tab_settings)
+        self.rb_icon_colour_black.setChecked(True)
+        self.rb_icon_colour_black.setObjectName(_fromUtf8("rb_icon_colour_black"))
+        self.horizontalLayout_7.addWidget(self.rb_icon_colour_black)
+        self.rb_icon_colour_white = QtGui.QRadioButton(self.tab_settings)
+        self.rb_icon_colour_white.setObjectName(_fromUtf8("rb_icon_colour_white"))
+        self.horizontalLayout_7.addWidget(self.rb_icon_colour_white)
+        spacerItem9 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_7.addItem(spacerItem9)
+        self.verticalLayout_7.addLayout(self.horizontalLayout_7)
+        self.verticalLayout_3.addLayout(self.verticalLayout_7)
+        spacerItem10 = QtGui.QSpacerItem(20, 226, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_3.addItem(spacerItem10)
         self.tabWidget.addTab(self.tab_settings, _fromUtf8(""))
         self.tab_history = QtGui.QWidget()
         self.tab_history.setObjectName(_fromUtf8("tab_history"))
@@ -202,8 +233,8 @@ class Ui_MainWindow(object):
         self.label_7.setObjectName(_fromUtf8("label_7"))
         self.verticalLayout_5.addWidget(self.label_7)
         self.horizontalLayout_5.addLayout(self.verticalLayout_5)
-        spacerItem8 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_5.addItem(spacerItem8)
+        spacerItem11 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_5.addItem(spacerItem11)
         self.verticalLayout_6.addLayout(self.horizontalLayout_5)
         self.label_8 = QtGui.QLabel(self.tab_about)
         self.label_8.setTextFormat(QtCore.Qt.RichText)
@@ -218,8 +249,8 @@ class Ui_MainWindow(object):
         self.lbl_status = QtGui.QLabel(self.centralWidget)
         self.lbl_status.setObjectName(_fromUtf8("lbl_status"))
         self.horizontalLayout.addWidget(self.lbl_status)
-        spacerItem9 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout.addItem(spacerItem9)
+        spacerItem12 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem12)
         self.button_refresh = QtGui.QPushButton(self.centralWidget)
         self.button_refresh.setObjectName(_fromUtf8("button_refresh"))
         self.horizontalLayout.addWidget(self.button_refresh)
@@ -248,34 +279,37 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Bing Wallpaper Changer", None, QtGui.QApplication.UnicodeUTF8))
-        self.lbl_image_preview.setText(QtGui.QApplication.translate("MainWindow", "Loading...", None, QtGui.QApplication.UnicodeUTF8))
-        self.lbl_image_info.setText(QtGui.QApplication.translate("MainWindow", "Loading...", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_preview), QtGui.QApplication.translate("MainWindow", "Preview", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_3.setText(QtGui.QApplication.translate("MainWindow", "Wallpaper resolution", None, QtGui.QApplication.UnicodeUTF8))
-        self.cb_resolution.setItemText(0, QtGui.QApplication.translate("MainWindow", "1024x768", None, QtGui.QApplication.UnicodeUTF8))
-        self.cb_resolution.setItemText(1, QtGui.QApplication.translate("MainWindow", "1280x720", None, QtGui.QApplication.UnicodeUTF8))
-        self.cb_resolution.setItemText(2, QtGui.QApplication.translate("MainWindow", "1366x768", None, QtGui.QApplication.UnicodeUTF8))
-        self.cb_resolution.setItemText(3, QtGui.QApplication.translate("MainWindow", "1920x1200", None, QtGui.QApplication.UnicodeUTF8))
-        self.cb_auto_update.setText(QtGui.QApplication.translate("MainWindow", "Automatically update wallpaper", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("MainWindow", "Check for updates every:", None, QtGui.QApplication.UnicodeUTF8))
-        self.sb_update_interval.setSuffix(QtGui.QApplication.translate("MainWindow", " minutes", None, QtGui.QApplication.UnicodeUTF8))
-        self.cb_run_command.setText(QtGui.QApplication.translate("MainWindow", "Run command after changing wallpaper", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_2.setText(QtGui.QApplication.translate("MainWindow", "Command:", None, QtGui.QApplication.UnicodeUTF8))
-        self.cb_enable_archive.setText(QtGui.QApplication.translate("MainWindow", "Keep a copy of images", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_6.setText(QtGui.QApplication.translate("MainWindow", "Location:", None, QtGui.QApplication.UnicodeUTF8))
-        self.button_archive_browse.setText(QtGui.QApplication.translate("MainWindow", "Browse", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_settings), QtGui.QApplication.translate("MainWindow", "Settings", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_history), QtGui.QApplication.translate("MainWindow", "History", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_5.setText(QtGui.QApplication.translate("MainWindow", "Bing Wallpaper Changer", None, QtGui.QApplication.UnicodeUTF8))
-        self.lbl_version.setText(QtGui.QApplication.translate("MainWindow", "Version %", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_7.setText(QtGui.QApplication.translate("MainWindow", "Copyright © 2013 Gary Hughes, overThere.co.uk", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_8.setText(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p>This program is released under the GPL v3 and all source can be downloaded from:</p><p><a href=\"https://bitbucket.org/gary_hughes/bing-wallpaper-changer\"><span style=\" text-decoration: underline; color:#0000ff;\">https://bitbucket.org/gary_hughes/bing-wallpaper-changer</span></a></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_about), QtGui.QApplication.translate("MainWindow", "About", None, QtGui.QApplication.UnicodeUTF8))
-        self.lbl_status.setText(QtGui.QApplication.translate("MainWindow", "CURRENT STATUS", None, QtGui.QApplication.UnicodeUTF8))
-        self.button_refresh.setText(QtGui.QApplication.translate("MainWindow", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
-        self.button_close.setText(QtGui.QApplication.translate("MainWindow", "Close", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionDelete_Files.setText(QtGui.QApplication.translate("MainWindow", "Delete Files", None, QtGui.QApplication.UnicodeUTF8))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Bing Wallpaper Changer", None))
+        self.lbl_image_preview.setText(_translate("MainWindow", "Loading...", None))
+        self.lbl_image_info.setText(_translate("MainWindow", "Loading...", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_preview), _translate("MainWindow", "Preview", None))
+        self.label_3.setText(_translate("MainWindow", "Wallpaper resolution", None))
+        self.cb_resolution.setItemText(0, _translate("MainWindow", "1024x768", None))
+        self.cb_resolution.setItemText(1, _translate("MainWindow", "1280x720", None))
+        self.cb_resolution.setItemText(2, _translate("MainWindow", "1366x768", None))
+        self.cb_resolution.setItemText(3, _translate("MainWindow", "1920x1200", None))
+        self.cb_auto_update.setText(_translate("MainWindow", "Automatically update wallpaper", None))
+        self.label.setText(_translate("MainWindow", "Check for updates every:", None))
+        self.sb_update_interval.setSuffix(_translate("MainWindow", " minutes", None))
+        self.cb_run_command.setText(_translate("MainWindow", "Run command after changing wallpaper", None))
+        self.label_2.setText(_translate("MainWindow", "Command:", None))
+        self.cb_enable_archive.setText(_translate("MainWindow", "Keep a copy of images", None))
+        self.label_6.setText(_translate("MainWindow", "Location:", None))
+        self.button_archive_browse.setText(_translate("MainWindow", "Browse", None))
+        self.label_9.setText(_translate("MainWindow", "Icon colour", None))
+        self.rb_icon_colour_black.setText(_translate("MainWindow", "Black", None))
+        self.rb_icon_colour_white.setText(_translate("MainWindow", "White", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_settings), _translate("MainWindow", "Settings", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_history), _translate("MainWindow", "History", None))
+        self.label_5.setText(_translate("MainWindow", "Bing Wallpaper Changer", None))
+        self.lbl_version.setText(_translate("MainWindow", "Version %", None))
+        self.label_7.setText(_translate("MainWindow", "Copyright © 2013 Gary Hughes, overThere.co.uk", None))
+        self.label_8.setText(_translate("MainWindow", "<html><head/><body><p>This program is released under the GPL v3 and all source can be downloaded from:</p><p><a href=\"https://bitbucket.org/gary_hughes/bing-wallpaper-changer\"><span style=\" text-decoration: underline; color:#0000ff;\">https://bitbucket.org/gary_hughes/bing-wallpaper-changer</span></a></p></body></html>", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_about), _translate("MainWindow", "About", None))
+        self.lbl_status.setText(_translate("MainWindow", "CURRENT STATUS", None))
+        self.button_refresh.setText(_translate("MainWindow", "Refresh", None))
+        self.button_close.setText(_translate("MainWindow", "Close", None))
+        self.actionDelete_Files.setText(_translate("MainWindow", "Delete Files", None))
 
 from custom_widgets import ImageLabel, ListWidget
 import rec_rc

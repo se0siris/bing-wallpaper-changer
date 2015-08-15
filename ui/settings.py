@@ -103,6 +103,19 @@ class Settings(object):
         self.settings.setValue('Archive/location', command_string)
 
     @property
+    def icon_colour(self):
+        return self.settings.value('GUI/icon_colour').toInt()[0]
+
+    @icon_colour.setter
+    def icon_colour(self, icon_colour):
+        """
+        Colour of the icon to use in the system tray.
+        :param icon_colour: 0 = black, 1 = white
+        :type icon_colour: int
+        """
+        self.settings.setValue('GUI/icon_colour', icon_colour)
+
+    @property
     def linux_desktop(self):
         return self.settings.value('Linux/desktop', QVariant('unity')).toString()
 
