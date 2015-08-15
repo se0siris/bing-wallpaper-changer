@@ -18,7 +18,7 @@ from ui.mainwindow import MainWindow
 from ui.message_boxes import message_box_ok, message_box_error
 
 
-VERSION = '1.5.0 - 01/06/2014'
+VERSION = '1.5.1 - 15/08/2015'
 
 
 def parse_arguments():

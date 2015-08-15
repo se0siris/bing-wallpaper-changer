@@ -139,8 +139,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.changer = WallpaperChanger()
         self.copyright_db = CopyrightDatabase()
 
-        # TODO: Add a dark/light icon selector in settings.
-        if platform.system() == 'Linux':
+        if self.settings.icon_colour == 1:
             white_icon = QIcon(':/icons/ui/ot_icon_white.svg')
             self.system_tray_icon = SystemTrayIcon(white_icon, self)
         else:
@@ -174,6 +173,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             event.ignore()
             self.setVisible(False)
+
+    def update_system_tray_icon(self, icon_colour=None):
+        if icon_colour is None:
+            icon_colour = self.settings.icon_colour
+
+        if icon_colour == 1:
+            white_icon = QIcon(':/icons/ui/ot_icon_white.svg')
+            self.system_tray_icon.setIcon(white_icon)
+        else:
+            self.system_tray_icon.setIcon(self.app.windowIcon())
 
     def update_status_text(self, text):
         """
@@ -366,6 +375,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not text or not os.path.isdir(text):
             return
         self.settings.archive_location = text
+
+    @pyqtSignature('bool')
+    def on_rb_icon_colour_black_toggled(self, enabled):
+        if enabled:
+            self.settings.icon_colour = 0
+            self.update_system_tray_icon(0)
+
+    @pyqtSignature('bool')
+    def on_rb_icon_colour_white_toggled(self, enabled):
+        if enabled:
+            self.settings.icon_colour = 1
+            self.update_system_tray_icon(1)
 
     @pyqtSignature('')
     def on_button_close_released(self):
