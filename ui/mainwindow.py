@@ -129,6 +129,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         title = '%s - v%s' % (str(self.app.applicationName()), str(self.app.applicationVersion()))
         self.setWindowTitle(title)
         self.lbl_version.setText(QString('Version %1').arg(self.app.applicationVersion()))
+        self.system_tray_icon = SystemTrayIcon(self.app.windowIcon(), self)
 
         self.preview_image = QImage()
         self.refresh_timer = QTimer()
@@ -139,11 +140,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.changer = WallpaperChanger()
         self.copyright_db = CopyrightDatabase()
 
-        if self.settings.icon_colour == 1:
-            white_icon = QIcon(':/icons/ui/ot_icon_white.svg')
-            self.system_tray_icon = SystemTrayIcon(white_icon, self)
-        else:
-            self.system_tray_icon = SystemTrayIcon(self.app.windowIcon(), self)
         self.system_tray_icon.activated.connect(self.system_tray_icon_activated)
         self.system_tray_icon.show()
 
