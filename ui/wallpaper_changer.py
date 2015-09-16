@@ -25,6 +25,8 @@ class WallpaperChanger(object):
                 return self._unity(filepath)
             elif env == 'xfce4':
                 return self._xfce4(filepath)
+            elif env == 'mate':
+                return self._mate(filepath)
 
     def _windows(self, filepath):
         import ctypes
@@ -38,6 +40,10 @@ class WallpaperChanger(object):
 
     def _unity(self, filepath):
         error = self.process.execute('gsettings set org.gnome.desktop.background picture-uri {0:s}'.format(filepath))
+        return not bool(error)
+
+    def _mate(self, filepath):
+        error = self.process.execute('gsettings set org.mate.background picture-filename {0:s}'.format(filepath))
         return not bool(error)
 
     def _xfce4(self, filepath):

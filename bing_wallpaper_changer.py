@@ -1,6 +1,6 @@
 """
 Bing Wallpaper Changer
-Copyright (c) 2014 Gary Hughes
+Copyright (c) 2015 Gary Hughes
 """
 import cStringIO as StringIO
 import argparse
@@ -18,7 +18,7 @@ from ui.mainwindow import MainWindow
 from ui.message_boxes import message_box_ok, message_box_error
 
 
-VERSION = '1.5.1 - 15/08/2015'
+VERSION = '1.5.2 - 16/09/2015'
 
 
 def parse_arguments():
