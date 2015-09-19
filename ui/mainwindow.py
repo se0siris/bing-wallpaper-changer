@@ -131,11 +131,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lbl_version.setText(QString('Version %1').arg(self.app.applicationVersion()))
         self.system_tray_icon = SystemTrayIcon(self.app.windowIcon(), self)
 
+        if platform.system() != 'Linux':
+            self.tabWidget.removeTab(2)
+
         self.preview_image = QImage()
         self.refresh_timer = QTimer()
         self.lbl_status.setText('')
         self.settings = Settings()
         self.load_settings()
+
+        self.cb_change_method.currentIndexChanged.connect(self.change_method_changed)
 
         self.changer = WallpaperChanger()
         self.copyright_db = CopyrightDatabase()
@@ -204,6 +209,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.rb_icon_colour_black.setChecked(True)
         else:
             self.rb_icon_colour_white.setChecked(True)
+
+        # Set desktop environment.
+        env_name = self.settings.linux_desktop
+        env_index = self.cb_change_method.findText(env_name, Qt.MatchFixedString)
+        self.cb_change_method.setCurrentIndex(env_index)
 
     def system_tray_icon_activated(self, reason):
         if reason == QSystemTrayIcon.DoubleClick:
@@ -323,6 +333,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         for day_index in [0, 8, 16]:
             self.image_downloader.get_history_thumbs(day_index)
 
+    def change_method_changed(self, index):
+        self.settings.linux_desktop = index
+
     @pyqtSignature('int')
     def on_cb_resolution_currentIndexChanged(self, index):
         self.settings.image_resolution = index
@@ -408,7 +421,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @pyqtSignature('int')
     def on_tabWidget_currentChanged(self, index):
-        if index == 2:
+        history_index = self.tabWidget.indexOf(self.tab_history)
+        if index == history_index:
             print 'History'
             self.lw_wallpaper_history.clear()
             self.lw_wallpaper_history.setIconSize(QSize(200, 200))
@@ -418,3 +432,4 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def on_lw_wallpaper_history_itemDoubleClicked(self, item):
         print 'Item with index {} clicked!'.format(item.image_day_index)
         self.image_downloader.get_full_wallpaper(item.image_day_index)
+

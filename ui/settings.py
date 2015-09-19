@@ -121,4 +121,11 @@ class Settings(object):
 
     @linux_desktop.setter
     def linux_desktop(self, value):
-        self.settings.setValue('Linux/desktop', value)
+        if value == 0:
+            self.settings.setValue('Linux/desktop', 'unity')
+        elif value == 1:
+            self.settings.setValue('Linux/desktop', 'mate')
+        elif value == 2:
+            self.settings.setValue('Linux/desktop', 'xfce4')
+        elif value == 3:
+            self.settings.setValue('Linux/desktop', 'feh')
