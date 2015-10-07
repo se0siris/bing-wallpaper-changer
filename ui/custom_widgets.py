@@ -94,7 +94,7 @@ class ListWidget(QListWidget):
         @type archive_path: unicode or None
         """
         if date.year() == QDate.currentDate().year():
-            date_label = str(date.toString('dddd dd MMMM, yyyy'))
+            date_label = str(date.toString('dddd dd MMMM'))
         else:
             date_label = str(date.toString('dddd dd MMMM, yyyy'))
         if date_label in self.added_dates:
