@@ -69,10 +69,11 @@ class ListWidget(QListWidget):
     def __init__(self, parent=None):
         super(ListWidget, self).__init__(parent)
         self.added_dates = set()
+        self.pixmap_hd = QPixmap(':/icons/ui/drive-harddisk.svg').scaledToWidth(25, Qt.SmoothTransformation)
 
     def clear(self):
         """
-        Subclassed clear() method to also clear the self.added_dates set.
+        Sub-classed clear() method to also clear the self.added_dates set.
         """
         super(ListWidget, self).clear()
         self.added_dates.clear()
@@ -92,13 +93,16 @@ class ListWidget(QListWidget):
         @type day_index: int
         @type archive_path: unicode or None
         """
-        date_label = str(date.toString('dddd dd MMMM'))
+        if date.year() == QDate.currentDate().year():
+            date_label = str(date.toString('dddd dd MMMM, yyyy'))
+        else:
+            date_label = str(date.toString('dddd dd MMMM, yyyy'))
         if date_label in self.added_dates:
             # This date has already been added. Don't bother adding it again.
             print 'Ignored', date_label
             return
-        pixmap = QPixmap.fromImage(thumbnail_image.scaled(QSize(200, 125), Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
         if archive_path:
+            pixmap = QPixmap.fromImage(thumbnail_image)
             painter = QPainter(pixmap)
             painter.setRenderHint(QPainter.Antialiasing)
             circle_area = QRect(pixmap.width() - 35, pixmap.height() - 35, 25, 25)
@@ -106,16 +110,16 @@ class ListWidget(QListWidget):
             painter.setPen(Qt.lightGray)
             painter.setBrush(Qt.lightGray)
             painter.drawEllipse(circle_area)
-            pixmap_hd = QPixmap(':/icons/ui/drive-harddisk.svg').scaledToWidth(25, Qt.SmoothTransformation)
-            painter.drawPixmap(circle_area.topLeft(), pixmap_hd)
+            painter.drawPixmap(circle_area.topLeft(), self.pixmap_hd)
             painter.end()
+        else:
+            pixmap = QPixmap.fromImage(
+                thumbnail_image.scaled(QSize(200, 125), Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
 
         icon = QIcon(pixmap)
-        widget_item = ListWidgetItem(icon, date_label)
+        widget_item = ListWidgetItem(icon, date_label, self)
         widget_item.setToolTip(info)
         widget_item.image_day_index = day_index
         widget_item.archive_path = archive_path
         widget_item.image_date = date
-        self.addItem(widget_item)
         self.added_dates.add(date_label)
-        self.sortItems(Qt.AscendingOrder)

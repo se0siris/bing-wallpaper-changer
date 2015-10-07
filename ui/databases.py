@@ -63,3 +63,17 @@ class CopyrightDatabase(QObject):
         query.first()
         copyright_info = query.value(0).toString()
         return copyright_info
+
+    def get_all_info(self):
+        info = {}
+        query = QSqlQuery(self.db)
+        query.setForwardOnly(True)
+        query.prepare('SELECT image_date, copyright_info FROM copyright;')
+        if not query.exec_():
+            self.error.emit('Error getting all copyright info', query.lastError().text())
+            return info
+        while query.next():
+            image_date = str(query.value(0).toString())
+            copyright_info = unicode(query.value(1).toString())
+            info[image_date] = copyright_info
+        return info
