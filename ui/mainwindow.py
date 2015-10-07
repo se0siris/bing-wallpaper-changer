@@ -252,6 +252,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not os.path.isfile(archive_path):
             archive_path = None
         self.lw_wallpaper_history.add_item(thumbnail_image, image_date, copyright_info, image_day_index, archive_path)
+        self.lw_wallpaper_history.sortItems(Qt.AscendingOrder)
 
     def update_preview_size(self):
         if self.preview_image.isNull():
@@ -309,19 +310,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         :rtype: QDate, unicode, unicode
         """
         image_reader = QImageReader()
+        regex_date_split = re.compile(r'(\d{4})(\d{2})(\d{2})')
 
+        copyright_info = self.copyright_db.get_all_info()
         archive_folder = self.settings.archive_location
-        for filename in (x for x in os.listdir(archive_folder) if re_archive_file.match(x)):
-            year = int(filename[:4])
-            month = int(filename[4:6])
-            day = int(filename[6:8])
+        for filename in reversed([x for x in os.listdir(archive_folder) if re_archive_file.match(x)]):
+            year, month, day = map(int, regex_date_split.findall(filename)[0])
             wallpaper_date = QDate(year, month, day)
-            wallpaper_copyright = self.copyright_db.get_info(wallpaper_date)
+            wallpaper_copyright = copyright_info.get('{0:04d}-{1:02d}-{2:02d}'.format(year, month, day), '')
             wallpaper_filename = os.path.join(unicode(archive_folder), filename)
 
             image_reader.setFileName(wallpaper_filename)
             image_size = image_reader.size()
-            image_size.scale(QSize(200, 200), Qt.KeepAspectRatio)
+            image_size.scale(QSize(200, 125), Qt.IgnoreAspectRatio)
             image_reader.setScaledSize(image_size)
             thumbnail_image = image_reader.read()
             if thumbnail_image.isNull():
@@ -329,9 +330,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.lw_wallpaper_history.add_item(thumbnail_image, wallpaper_date, wallpaper_copyright,
                                                archive_path=wallpaper_filename)
             self.app.processEvents()
-
+        self.lw_wallpaper_history.sortItems(Qt.AscendingOrder)
         for day_index in [0, 8, 16]:
             self.image_downloader.get_history_thumbs(day_index)
+        self.lw_wallpaper_history.sortItems(Qt.AscendingOrder)
 
     def change_method_changed(self, index):
         self.settings.linux_desktop = index
