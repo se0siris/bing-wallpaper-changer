@@ -422,10 +422,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @pyqtSignature('int')
     def on_tabWidget_currentChanged(self, index):
+        self.lw_wallpaper_history.clear()
         history_index = self.tabWidget.indexOf(self.tab_history)
         if index == history_index:
             print 'History'
-            self.lw_wallpaper_history.clear()
             self.lw_wallpaper_history.setIconSize(QSize(200, 200))
             for day_index in [0, 8, 16]:
                 self.image_downloader.get_history_thumbs(day_index)
