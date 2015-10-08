@@ -333,9 +333,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                                archive_path=wallpaper_filename)
             self.app.processEvents()
         self.lw_wallpaper_history.sortItems(Qt.AscendingOrder)
-        for day_index in [0, 8, 16]:
-            self.image_downloader.get_history_thumbs(day_index)
-        self.lw_wallpaper_history.sortItems(Qt.AscendingOrder)
 
     def change_method_changed(self, index):
         self.settings.linux_desktop = index
@@ -430,7 +427,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             print 'History'
             self.lw_wallpaper_history.clear()
             self.lw_wallpaper_history.setIconSize(QSize(200, 200))
-            self.get_archive_wallpapers()
+            for day_index in [0, 8, 16]:
+                self.image_downloader.get_history_thumbs(day_index)
+            if self.settings.archive_enabled:
+                self.get_archive_wallpapers()
 
     @pyqtSignature('QListWidgetItem *')
     def on_lw_wallpaper_history_itemDoubleClicked(self, item):
