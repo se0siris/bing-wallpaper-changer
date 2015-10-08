@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\dev\Python\Bing Wallpaper Changer\ui\mainwindow.ui'
+# Form implementation generated from reading ui file 'S:\dev\Python\Bing Wallpaper Changer\ui\mainwindow.ui'
 #
-# Created: Sat Sep 19 14:24:08 2015
+# Created: Thu Oct 08 16:46:36 2015
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -333,7 +333,7 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_history), _translate("MainWindow", "History", None))
         self.label_5.setText(_translate("MainWindow", "Bing Wallpaper Changer", None))
         self.lbl_version.setText(_translate("MainWindow", "Version %", None))
-        self.label_7.setText(_translate("MainWindow", "Copyright © 2013 Gary Hughes, overThere.co.uk", None))
+        self.label_7.setText(_translate("MainWindow", "Copyright © 2015 Gary Hughes, overThere.co.uk", None))
         self.label_8.setText(_translate("MainWindow", "<html><head/><body><p>This program is released under the GPL v3 and all source can be downloaded from:</p><p><a href=\"https://bitbucket.org/gary_hughes/bing-wallpaper-changer\"><span style=\" text-decoration: underline; color:#0000ff;\">https://bitbucket.org/gary_hughes/bing-wallpaper-changer</span></a></p></body></html>", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_about), _translate("MainWindow", "About", None))
         self.lbl_status.setText(_translate("MainWindow", "CURRENT STATUS", None))
