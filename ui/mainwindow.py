@@ -9,6 +9,7 @@ import tempfile
 from xml.etree import ElementTree
 import re
 
+import shutil
 from PyQt4.QtGui import QMainWindow, QApplication, QImage, QPixmap, QSystemTrayIcon, QIcon, QFileDialog, QImageReader
 from PyQt4.QtCore import pyqtSignature, pyqtSignal, Qt, QString, QDate, QTimer, QProcess, QUrl, QObject, QSize
 from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest
@@ -16,6 +17,7 @@ from PyQt4.QtNetwork import QNetworkAccessManager, QNetworkRequest
 from Ui_mainwindow import Ui_MainWindow
 from ui.custom_widgets import SystemTrayIcon
 from ui.databases import CopyrightDatabase
+from ui.message_boxes import message_box_error
 from ui.settings import Settings
 from ui.wallpaper_changer import WallpaperChanger
 
@@ -432,6 +434,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @pyqtSignature('QListWidgetItem *')
     def on_lw_wallpaper_history_itemDoubleClicked(self, item):
-        print 'Item with index {} clicked!'.format(item.image_day_index)
-        self.image_downloader.get_full_wallpaper(item.image_day_index)
+        day_index = item.image_day_index
+        print 'Item with index {0:d} clicked!'.format(day_index)
+        if day_index == -1:
+            # Item is a wallpaper from the archive folder.
+            try:
+                archive_path = item.archive_path
+            except AttributeError:
+                return
+            print 'Applying wallpaper from', archive_path
+            temp_path = os.path.join(tempfile.gettempdir(), 'bing_wallpaper.jpg')
+            try:
+                shutil.copyfile(archive_path, temp_path)
+            except IOError:
+                message_box_error('Error applying wallpaper', 'Could not copy wallpaper image to temp folder.')
+                return
+            self.update_status_text('Applying wallpaper...')
+            self.changer.apply_wallpaper(temp_path)
+            self.update_status_text('')
+        else:
+            # The day index is still available. Start the download.
+            self.image_downloader.get_full_wallpaper(item.image_day_index)
 
