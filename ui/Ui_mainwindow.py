@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'S:\dev\Python\Bing Wallpaper Changer\ui\mainwindow.ui'
 #
-# Created: Thu Oct 08 16:46:36 2015
+# Created: Thu Oct 29 10:08:07 2015
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -195,6 +195,7 @@ class Ui_MainWindow(object):
         self.cb_change_method.addItem(_fromUtf8(""))
         self.cb_change_method.addItem(_fromUtf8(""))
         self.cb_change_method.addItem(_fromUtf8(""))
+        self.cb_change_method.addItem(_fromUtf8(""))
         self.horizontalLayout_8.addWidget(self.cb_change_method)
         self.verticalLayout_8.addLayout(self.horizontalLayout_8)
         spacerItem12 = QtGui.QSpacerItem(20, 267, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
@@ -329,6 +330,7 @@ class Ui_MainWindow(object):
         self.cb_change_method.setItemText(1, _translate("MainWindow", "MATE", None))
         self.cb_change_method.setItemText(2, _translate("MainWindow", "XFCE4", None))
         self.cb_change_method.setItemText(3, _translate("MainWindow", "Feh", None))
+        self.cb_change_method.setItemText(4, _translate("MainWindow", "KDE4", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_desktop_environment), _translate("MainWindow", "Desktop Environment", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_history), _translate("MainWindow", "History", None))
         self.label_5.setText(_translate("MainWindow", "Bing Wallpaper Changer", None))

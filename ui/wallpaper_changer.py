@@ -1,3 +1,5 @@
+import os
+
 from PyQt4.QtCore import QProcess
 from ui.settings import Settings
 import re
@@ -27,6 +29,8 @@ class WallpaperChanger(object):
                 return self._xfce4(filepath)
             elif env == 'mate':
                 return self._mate(filepath)
+            elif env == 'kde4':
+                return self._kde4(filepath)
 
     def _windows(self, filepath):
         import ctypes
@@ -62,3 +66,38 @@ class WallpaperChanger(object):
                 error = True
         return not error
 
+    def _kde4(self, filepath):
+        kde4_js = '''
+var wallpaper = "{0:s}";
+var activity = activities()[0];
+activity.currentConfigGroup = ["Wallpaper","image"];
+activity.writeConfig("wallpaper", wallpaper);
+activity.writeConfig("userswallpaper", wallpaper);
+activity.reloadConfig();
+        '''.format(filepath)
+        kde4_js_path = '/tmp/bwc_kde4_js'
+        with open(kde4_js_path, 'w') as kde4_js_file:
+            kde4_js_file.write(kde4_js)
+
+        self.process.start('qdbus', ['org.kde.plasma-desktop', '/MainApplication', 'loadScriptInInteractiveConsole',
+                                     kde4_js_path])
+        self.process.waitForFinished()
+        os.remove(kde4_js_path)
+
+        self.process.start('dbus-send',
+                           ['--dest=org.kde.plasma-desktop', '/MainApplication',
+                            'org.kde.plasma-desktop.reparseConfiguration'])
+        self.process.waitForFinished()
+        self.process.start('dbus-send',
+                           ['--dest=org.freedesktop.DBus', '/org/freedesktop/DBus',
+                            'org.freedesktop.DBus.ReloadConfig'])
+        self.process.waitForFinished()
+        self.process.start('dbus-send',
+                           ['--dest=org.kde.kwin', '/KWin', 'org.kde.KWin.reloadConfig'])
+        self.process.waitForFinished()
+
+        self.process.start('kbuildsycoca4')
+        self.process.waitForFinished()
+        self.process.start('kquitapp', ['plasma-desktop'])
+        self.process.waitForFinished()
+        self.process.start('kstart', ['plasma-desktop'])

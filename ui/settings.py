@@ -129,3 +129,5 @@ class Settings(object):
             self.settings.setValue('Linux/desktop', 'xfce4')
         elif value == 3:
             self.settings.setValue('Linux/desktop', 'feh')
+        elif value == 4:
+            self.settings.setValue('Linux/desktop', 'kde4')
