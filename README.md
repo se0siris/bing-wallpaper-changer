@@ -12,7 +12,20 @@ I don't use Bing as a search engine, but I do very much like their daily images.
 
 After not being able to find a similar program with the features I wanted I decided to write my own.
 
+### Screenshots ###
+
+![Preview Tab](./bwc_preview.png)
+![Settings Tab](./bwc_settings.png)
+![History Tab](./bwc_history.png)
+
+
 ### Changelog ###
+
+##### 1.6 #####
+
+  - Added support for extra desktop environments under Linux.
+  - Improved performance of History tab when loading images from disk.
+  - Ability to switch between black and white icon for system tray.
 
 ##### 1.5 #####
   - Ability to save images to a custom folder.
