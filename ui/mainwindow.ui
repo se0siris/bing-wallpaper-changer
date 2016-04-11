@@ -512,6 +512,11 @@
               <string>Feh</string>
              </property>
             </item>
+            <item>
+             <property name="text">
+              <string>KDE4</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>
