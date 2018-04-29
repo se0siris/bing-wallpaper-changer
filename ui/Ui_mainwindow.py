@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'S:\dev\Python\Bing Wallpaper Changer\ui\mainwindow.ui'
+# Form implementation generated from reading ui file 'C:\Dev\Python\bing-wallpaper-changer\ui\mainwindow.ui'
 #
-# Created: Thu Oct 29 10:08:07 2015
-#      by: PyQt4 UI code generator 4.9.6
+# Created by: PyQt4 UI code generator 4.11.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -211,7 +210,6 @@ class Ui_MainWindow(object):
         self.lw_wallpaper_history.setHorizontalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
         self.lw_wallpaper_history.setMovement(QtGui.QListView.Static)
         self.lw_wallpaper_history.setResizeMode(QtGui.QListView.Adjust)
-        self.lw_wallpaper_history.setSpacing(5)
         self.lw_wallpaper_history.setViewMode(QtGui.QListView.IconMode)
         self.lw_wallpaper_history.setUniformItemSizes(True)
         self.lw_wallpaper_history.setObjectName(_fromUtf8("lw_wallpaper_history"))

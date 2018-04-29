@@ -1,6 +1,6 @@
 """
 Bing Wallpaper Changer
-Copyright (c) 2015 Gary Hughes
+Copyright (c) 2018 Gary Hughes
 """
 import cStringIO as StringIO
 import argparse
@@ -18,7 +18,7 @@ from ui.mainwindow import MainWindow
 from ui.message_boxes import message_box_ok, message_box_error
 
 
-VERSION = '1.6.0'
+VERSION = '1.6.1'
 
 
 def parse_arguments():
@@ -88,17 +88,20 @@ def startmain():
     app = QApplication(sys.argv)
     app.cleanup_files = []
 
-    QApplication.setStyle(QStyleFactory.create('CleanLooks'))
-    QApplication.setPalette(QApplication.style().standardPalette())
+    app.setStyle(QStyleFactory.create('CleanLooks'))
+    app.setPalette(QApplication.style().standardPalette())
 
-    QApplication.setApplicationName('Bing Wallpaper Changer')
-    QApplication.setApplicationVersion(VERSION)
-    QApplication.setOrganizationName('overThere.co.uk')
-    QApplication.setWindowIcon(QIcon(':/icons/ui/ot_icon.svg'))
+    app_icon = QIcon(':/icons/ui/ot_icon.svg')
+    print app_icon.isNull(), app_icon.pixmap(200, 200).isNull()
 
-    print 'AppName: %s' % QApplication.applicationName()
-    print 'AppVersion: %s' % QApplication.applicationVersion()
-    print 'Company Name: %s' % QApplication.organizationName()
+    app.setApplicationName('Bing Wallpaper Changer')
+    app.setApplicationVersion(VERSION)
+    app.setOrganizationName('overThere.co.uk')
+    app.setWindowIcon(app_icon)
+
+    print u'AppName: {0:s}'.format(app.applicationName())
+    print u'AppVersion: {0:s}'.format(app.applicationVersion())
+    print u'Company Name: {0:s}'.format(app.organizationName())
 
     QLocale.setDefault(QLocale(QLocale.English, QLocale.UnitedKingdom))
 

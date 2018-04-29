@@ -28,11 +28,12 @@ re_archive_file = re.compile(r'[0-9]{8}\.jpg')
 class ImageDownloader(QObject):
     # Signals.
     download_finished = pyqtSignal(QImage, QDate, str)
+    download_failed = pyqtSignal(basestring)
     thumbnail_download_finished = pyqtSignal(QImage, QDate, str, int)
     status_text = pyqtSignal(QString)
 
     def __init__(self, parent=None):
-        QObject.__init__(self, parent)
+        super(ImageDownloader, self).__init__(parent)
         self.resolution = '1920x1200'
         self.last_image_url = None
         self.manager = QNetworkAccessManager()
@@ -50,7 +51,7 @@ class ImageDownloader(QObject):
     def _get_url(self, url_string, request_type=None, request_metadata=None):
         url = QUrl(url_string)
         request = QNetworkRequest(QUrl(url))
-        if not request_type is None:
+        if request_type is not None:
             request.setAttribute(QNetworkRequest.User, (request_type, request_metadata))
         self.manager.get(request)
 
@@ -91,8 +92,9 @@ class ImageDownloader(QObject):
         url = reply.url()
         print 'URL Downloaded:', str(url.toEncoded())
         if reply.error():
-            error_message = str(reply.errorString())
-            print 'Download of %s failed: %s' % (url.toEncoded(), error_message)
+            error_message = unicode(reply.errorString())
+            self.download_failed.emit(error_message)
+            print 'Download of {0:s} failed: {1:s}'.format(url.toEncoded(), error_message)
         else:
             # print 'Mime-type:', str(reply.header(QNetworkRequest.ContentTypeHeader).toString())
             data = reply.readAll()
@@ -123,14 +125,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         Constructor
         """
-        QMainWindow.__init__(self, parent)
+        super(MainWindow, self).__init__(parent)
         self.setupUi(self)
         self.app = QApplication.instance()
 
         # Set window title to include application version number.
-        title = '%s - v%s' % (str(self.app.applicationName()), str(self.app.applicationVersion()))
+        title = '{0:s} - v{1:s}'.format(unicode(self.app.applicationName()),
+                                        unicode(self.app.applicationVersion()))
         self.setWindowTitle(title)
-        self.lbl_version.setText(QString('Version %1').arg(self.app.applicationVersion()))
+        self.lbl_version.setText('Version {0:s}'.format(unicode(self.app.applicationVersion())))
         self.system_tray_icon = SystemTrayIcon(self.app.windowIcon(), self)
 
         if platform.system() != 'Linux':
@@ -152,6 +155,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.image_downloader = ImageDownloader()
         self.image_downloader.status_text.connect(self.update_status_text)
+        self.image_downloader.download_failed.connect(self.download_failed)
         self.image_downloader.download_finished.connect(self.download_finished)
         self.image_downloader.thumbnail_download_finished.connect(self.thumbnail_download_finished)
         self.on_button_refresh_released()
@@ -222,6 +226,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.show()
             self.raise_()
             self.update_preview_size()
+
+    def download_failed(self, error_message):
+        """
+        Report that the download failed to the user and re-enable the Refresh button
+        :type error_message: QString
+        :return:
+        :rtype:
+        """
+        self.lbl_status.setText(error_message)
+        self.button_refresh.setEnabled(True)
+
+        self.lbl_image_preview.setPixmap(QPixmap())
+        self.lbl_image_preview.setText('[NO PREVIEW]')
+        self.lbl_image_info.setText('Last download attempt failed.')
 
     def download_finished(self, wallpaper_image, start_date, copyright_info):
         """
