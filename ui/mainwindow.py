@@ -26,6 +26,10 @@ re_archive_file = re.compile(r'[0-9]{8}\.jpg')
 
 
 class ImageDownloader(QObject):
+
+    TYPE_META = 1000
+    ATTEMPTS = 1001
+
     # Signals.
     download_finished = pyqtSignal(QImage, QDate, str)
     download_failed = pyqtSignal(basestring)
@@ -52,7 +56,7 @@ class ImageDownloader(QObject):
         url = QUrl(url_string)
         request = QNetworkRequest(QUrl(url))
         if request_type is not None:
-            request.setAttribute(QNetworkRequest.User, (request_type, request_metadata))
+            request.setAttribute(self.TYPE_META, (request_type, request_metadata))
         self.manager.get(request)
 
     def get_full_wallpaper(self, day_index=0):
@@ -90,15 +94,24 @@ class ImageDownloader(QObject):
 
     def reply_finished(self, reply):
         url = reply.url()
+        request = reply.request()
         print 'URL Downloaded:', str(url.toEncoded())
         if reply.error():
+            attempts = request.attribute(self.ATTEMPTS)
+            attempts = 0 if attempts.isNull() else attempts.toInt()[0]
+            if attempts <= 10:
+                request.setAttribute(self.ATTEMPTS, attempts + 1)
+                print 'Network not available. Trying again in 5 seconds...', self.manager.networkAccessible()
+                QTimer.singleShot(5000, lambda: self.manager.get(request))
+                return
+
             error_message = unicode(reply.errorString())
             self.download_failed.emit(error_message)
             print 'Download of {0:s} failed: {1:s}'.format(url.toEncoded(), error_message)
         else:
             # print 'Mime-type:', str(reply.header(QNetworkRequest.ContentTypeHeader).toString())
             data = reply.readAll()
-            attribute = reply.request().attribute(QNetworkRequest.User)
+            attribute = request.attribute(self.TYPE_META)
             if not attribute.isNull():
                 request_type, request_metadata = attribute.toPyObject()
                 if request_type == 0:  # Daily wallpaper XML.

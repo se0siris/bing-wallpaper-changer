@@ -11,14 +11,14 @@ import sys
 import platform
 
 from PyQt4.QtCore import QLocale, QSharedMemory
-from PyQt4.QtGui import QApplication, QStyleFactory, QIcon, QPixmap
+from PyQt4.QtGui import QApplication, QStyleFactory, QIcon
 import signal
 
 from ui.mainwindow import MainWindow
 from ui.message_boxes import message_box_ok, message_box_error
 
 
-VERSION = '1.6.1'
+VERSION = '1.6.2'
 
 
 def parse_arguments():
