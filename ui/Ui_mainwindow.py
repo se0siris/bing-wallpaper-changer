@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\Dev\Python\bing-wallpaper-changer\ui\mainwindow.ui'
+# Form implementation generated from reading ui file 'mainwindow.ui'
 #
-# Created by: PyQt4 UI code generator 4.11.4
+# Created by: PyQt4 UI code generator 4.12.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -25,7 +25,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(717, 391)
+        MainWindow.resize(717, 454)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/ui/ot_icon.svg")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
@@ -38,6 +38,7 @@ class Ui_MainWindow(object):
         self.tab_preview = QtGui.QWidget()
         self.tab_preview.setObjectName(_fromUtf8("tab_preview"))
         self.verticalLayout = QtGui.QVBoxLayout(self.tab_preview)
+        self.verticalLayout.setMargin(0)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.lbl_image_preview = ImageLabel(self.tab_preview)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Ignored)
@@ -77,6 +78,7 @@ class Ui_MainWindow(object):
         self.tab_settings = QtGui.QWidget()
         self.tab_settings.setObjectName(_fromUtf8("tab_settings"))
         self.verticalLayout_3 = QtGui.QVBoxLayout(self.tab_settings)
+        self.verticalLayout_3.setMargin(0)
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
         self.horizontalLayout_4 = QtGui.QHBoxLayout()
         self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
@@ -180,6 +182,7 @@ class Ui_MainWindow(object):
         self.tab_desktop_environment = QtGui.QWidget()
         self.tab_desktop_environment.setObjectName(_fromUtf8("tab_desktop_environment"))
         self.verticalLayout_8 = QtGui.QVBoxLayout(self.tab_desktop_environment)
+        self.verticalLayout_8.setMargin(0)
         self.verticalLayout_8.setObjectName(_fromUtf8("verticalLayout_8"))
         self.horizontalLayout_8 = QtGui.QHBoxLayout()
         self.horizontalLayout_8.setObjectName(_fromUtf8("horizontalLayout_8"))
@@ -195,6 +198,7 @@ class Ui_MainWindow(object):
         self.cb_change_method.addItem(_fromUtf8(""))
         self.cb_change_method.addItem(_fromUtf8(""))
         self.cb_change_method.addItem(_fromUtf8(""))
+        self.cb_change_method.addItem(_fromUtf8(""))
         self.horizontalLayout_8.addWidget(self.cb_change_method)
         self.verticalLayout_8.addLayout(self.horizontalLayout_8)
         spacerItem12 = QtGui.QSpacerItem(20, 267, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
@@ -203,6 +207,7 @@ class Ui_MainWindow(object):
         self.tab_history = QtGui.QWidget()
         self.tab_history.setObjectName(_fromUtf8("tab_history"))
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.tab_history)
+        self.verticalLayout_4.setMargin(0)
         self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
         self.lw_wallpaper_history = ListWidget(self.tab_history)
         self.lw_wallpaper_history.setDragDropMode(QtGui.QAbstractItemView.NoDragDrop)
@@ -218,6 +223,7 @@ class Ui_MainWindow(object):
         self.tab_about = QtGui.QWidget()
         self.tab_about.setObjectName(_fromUtf8("tab_about"))
         self.verticalLayout_6 = QtGui.QVBoxLayout(self.tab_about)
+        self.verticalLayout_6.setMargin(0)
         self.verticalLayout_6.setObjectName(_fromUtf8("verticalLayout_6"))
         self.horizontalLayout_5 = QtGui.QHBoxLayout()
         self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
@@ -329,6 +335,7 @@ class Ui_MainWindow(object):
         self.cb_change_method.setItemText(2, _translate("MainWindow", "XFCE4", None))
         self.cb_change_method.setItemText(3, _translate("MainWindow", "Feh", None))
         self.cb_change_method.setItemText(4, _translate("MainWindow", "KDE4", None))
+        self.cb_change_method.setItemText(5, _translate("MainWindow", "Cinnamon", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_desktop_environment), _translate("MainWindow", "Desktop Environment", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_history), _translate("MainWindow", "History", None))
         self.label_5.setText(_translate("MainWindow", "Bing Wallpaper Changer", None))
