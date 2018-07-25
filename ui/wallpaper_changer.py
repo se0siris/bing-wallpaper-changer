@@ -31,6 +31,8 @@ class WallpaperChanger(object):
                 return self._mate(filepath)
             elif env == 'kde4':
                 return self._kde4(filepath)
+            elif env == 'cinnamon':
+                return self._cinnamon(filepath)
 
     def _windows(self, filepath):
         import ctypes
@@ -101,3 +103,7 @@ activity.reloadConfig();
         self.process.start('kquitapp', ['plasma-desktop'])
         self.process.waitForFinished()
         self.process.start('kstart', ['plasma-desktop'])
+
+    def _cinnamon(self, filepath):
+        error = self.process.execute('gsettings set org.cinnamon.desktop.background picture-uri "file://{0:s}"'.format(filepath))
+        return not bool(error)
