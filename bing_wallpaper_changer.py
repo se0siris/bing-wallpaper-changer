@@ -18,7 +18,7 @@ from ui.mainwindow import MainWindow
 from ui.message_boxes import message_box_ok, message_box_error
 
 
-VERSION = '1.6.2'
+VERSION = '1.6.3'
 
 
 def parse_arguments():
@@ -27,6 +27,8 @@ def parse_arguments():
     parser.add_argument('--quit', dest='quit', action='store_true', default=False, help='update wallpaper and exit')
     parser.add_argument('--quit-existing', dest='quit_existing', action='store_true', default=False,
                         help='close already running process')
+    parser.add_argument('--native-style', dest='native_style', action='store_true', default=False,
+                        help='use native UI style')
     parser.add_argument('--help', dest='help', action='store_true', help='show help window')
     parser.add_argument('--version', action='version', version='Bing Wallpaper Changer %s' % VERSION)
 
@@ -85,11 +87,14 @@ def startmain():
     """
     Initialise the application and display the main window.
     """
+    args = parse_arguments()
+
     app = QApplication(sys.argv)
     app.cleanup_files = []
 
-    app.setStyle(QStyleFactory.create('CleanLooks'))
-    app.setPalette(QApplication.style().standardPalette())
+    if not args.native_style:
+        app.setStyle(QStyleFactory.create('CleanLooks'))
+        app.setPalette(QApplication.style().standardPalette())
 
     app_icon = QIcon(':/icons/ui/ot_icon.svg')
     print app_icon.isNull(), app_icon.pixmap(200, 200).isNull()
@@ -106,7 +111,7 @@ def startmain():
     QLocale.setDefault(QLocale(QLocale.English, QLocale.UnitedKingdom))
 
     # Add passed arguments to app.
-    app.args = parse_arguments()
+    app.args = args
     print 'Args:', app.args
 
     # Check to see if application already running.
