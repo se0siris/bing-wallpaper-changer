@@ -1,6 +1,6 @@
 import os
 
-from PyQt4.QtCore import QProcess
+from PyQt5.QtCore import QProcess
 from ui.settings import Settings
 import re
 import platform
@@ -20,7 +20,7 @@ class WallpaperChanger(object):
         elif system_platform == 'Linux':
             # Read desktop environment from settings.
             env = self.settings.linux_desktop
-            print 'Setting wallpaper using environment "{0:s}"'.format(env)
+            print('Setting wallpaper using environment "{0:s}"'.format(env))
             if env == 'feh':
                 return self._feh(filepath)
             elif env == 'unity':
@@ -37,8 +37,9 @@ class WallpaperChanger(object):
     def _windows(self, filepath):
         import ctypes
 
-        SPI_SETDESKWALLPAPER = 20  # According to http://support.microsoft.com/default.aspx?scid=97142
-        ctypes.windll.user32.SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, filepath, 1)
+        SPI_SETDESKWALLPAPER = 0x14  # According to http://support.microsoft.com/default.aspx?scid=97142
+        SPIF_UPDATEINIFILE = 0x2
+        ctypes.windll.user32.SystemParametersInfoW(SPI_SETDESKWALLPAPER, 0, filepath, SPIF_UPDATEINIFILE)
 
     def _feh(self, filepath):
         error = self.process.execute('feh --bg-scale {0:s}'.format(filepath))
@@ -56,7 +57,7 @@ class WallpaperChanger(object):
         self.process.start('xfconf-query -c xfce4-desktop -l')
         self.process.waitForFinished()
         properties = re.findall(r'(/backdrop/screen.*(?:last-image|image-path))',
-                                unicode(self.process.readAllStandardOutput()))
+                                str(self.process.readAllStandardOutput()))
         error = False
         for item in properties:
             self.process.start('xfconf-query --channel xfce4-desktop --property {0:s} --set {1:s}'.format(item, '/'))

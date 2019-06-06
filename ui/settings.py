@@ -1,6 +1,5 @@
 import os
-from PyQt4.QtCore import QSettings, QVariant
-from PyQt4.QtGui import QDesktopServices
+from PyQt5.QtCore import QSettings, QStandardPaths
 
 __author__ = 'Gary Hughes'
 
@@ -11,16 +10,16 @@ class Settings(object):
     """
 
     def __init__(self):
-        settings_folder = str(QDesktopServices.storageLocation(QDesktopServices.DataLocation))
+        settings_folder = QStandardPaths.writableLocation(QStandardPaths.DataLocation)
         if not os.path.isdir(settings_folder):
             os.makedirs(settings_folder)
         settings_path = os.path.join(settings_folder, 'settings.ini')
-        print settings_path
+        print(settings_path)
         self.settings = QSettings(settings_path, QSettings.IniFormat)
 
     @property
     def image_resolution(self):
-        return self.settings.value('Image/resolution', QVariant(3)).toInt()[0]
+        return self.settings.value('Image/resolution', 3, type=int)
 
     @image_resolution.setter
     def image_resolution(self, resolution):
@@ -32,7 +31,7 @@ class Settings(object):
 
     @property
     def auto_update_enabled(self):
-        return self.settings.value('Automatic_update/enabled', QVariant(True)).toBool()
+        return self.settings.value('Automatic_update/enabled', True, type=bool)
 
     @auto_update_enabled.setter
     def auto_update_enabled(self, enabled):
@@ -44,7 +43,7 @@ class Settings(object):
 
     @property
     def auto_update_interval(self):
-        return self.settings.value('Automatic_update/interval', QVariant(1200000)).toInt()[0]
+        return self.settings.value('Automatic_update/interval', 1200000, type=int)
 
     @auto_update_interval.setter
     def auto_update_interval(self, interval):
@@ -56,7 +55,7 @@ class Settings(object):
 
     @property
     def run_command_enabled(self):
-        return self.settings.value('Run_command/enabled', QVariant(False)).toBool()
+        return self.settings.value('Run_command/enabled', False, type=bool)
 
     @run_command_enabled.setter
     def run_command_enabled(self, enabled):
@@ -68,7 +67,7 @@ class Settings(object):
 
     @property
     def run_command_command(self):
-        return self.settings.value('Run_command/command', QVariant('')).toString()
+        return self.settings.value('Run_command/command', '')
 
     @run_command_command.setter
     def run_command_command(self, command_string):
@@ -80,7 +79,7 @@ class Settings(object):
 
     @property
     def archive_enabled(self):
-        return self.settings.value('Archive/enabled', QVariant(False)).toBool()
+        return self.settings.value('Archive/enabled', False, type=bool)
 
     @archive_enabled.setter
     def archive_enabled(self, enabled):
@@ -92,7 +91,7 @@ class Settings(object):
 
     @property
     def archive_location(self):
-        return self.settings.value('Archive/location', QVariant('')).toString()
+        return self.settings.value('Archive/location', '')
 
     @archive_location.setter
     def archive_location(self, command_string):
@@ -104,7 +103,7 @@ class Settings(object):
 
     @property
     def icon_colour(self):
-        return self.settings.value('GUI/icon_colour').toInt()[0]
+        return self.settings.value('GUI/icon_colour', type=int)
 
     @icon_colour.setter
     def icon_colour(self, icon_colour):
@@ -117,7 +116,7 @@ class Settings(object):
 
     @property
     def linux_desktop(self):
-        return self.settings.value('Linux/desktop', QVariant('unity')).toString()
+        return self.settings.value('Linux/desktop', 'unity')
 
     @linux_desktop.setter
     def linux_desktop(self, value):

@@ -14,7 +14,7 @@
    <string>Bing Wallpaper Changer</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../rec.qrc">
+   <iconset>
     <normaloff>:/icons/ui/ot_icon.svg</normaloff>:/icons/ui/ot_icon.svg</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -589,7 +589,7 @@
              <string/>
             </property>
             <property name="pixmap">
-             <pixmap resource="../rec.qrc">:/icons/ui/ot_icon.svg</pixmap>
+             <pixmap>:/icons/ui/ot_icon.svg</pixmap>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -636,7 +636,7 @@
                </font>
               </property>
               <property name="text">
-               <string>Copyright © 2015 Gary Hughes, overThere.co.uk</string>
+               <string>Copyright © 2019 Gary Hughes, overThere.co.uk</string>
               </property>
              </widget>
             </item>
@@ -727,16 +727,17 @@
   <customwidget>
    <class>ImageLabel</class>
    <extends>QLabel</extends>
-   <header>custom_widgets</header>
+   <header>ui.custom_widgets</header>
   </customwidget>
   <customwidget>
    <class>ListWidget</class>
    <extends>QListWidget</extends>
-   <header>custom_widgets</header>
+   <header>ui.custom_widgets</header>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../rec.qrc"/>
+  <include location="rec.qrc"/>
+  <include location="rec.qrc"/>
  </resources>
  <connections>
   <connection>
