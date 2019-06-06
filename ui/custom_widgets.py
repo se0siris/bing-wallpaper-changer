@@ -1,6 +1,6 @@
-from PyQt4.QtCore import QSize, QDate, Qt, QRect
-from PyQt4.QtGui import QLabel, QSystemTrayIcon, QMenu, QApplication, QListWidgetItem, QListWidget, QPixmap, QPainter, \
-    QIcon
+from PyQt5.QtCore import QSize, QDate, Qt, QRect
+from PyQt5.QtWidgets import QLabel, QSystemTrayIcon, QMenu, QApplication, QListWidgetItem, QListWidget
+from PyQt5.QtGui import QPixmap, QPainter, QIcon
 
 __author__ = 'Gary'
 
@@ -21,7 +21,7 @@ class ImageLabel(QLabel):
 
 class SystemTrayIcon(QSystemTrayIcon):
     def __init__(self, icon, parent=None):
-        QSystemTrayIcon.__init__(self, icon, parent)
+        super(SystemTrayIcon, self).__init__(icon, parent)
         menu = QMenu(parent)
         self.settings_action = menu.addAction('&Settings')
         self.exit_action = menu.addAction('E&xit')
@@ -94,12 +94,12 @@ class ListWidget(QListWidget):
         @type archive_path: unicode or None
         """
         if date.year() == QDate.currentDate().year():
-            date_label = str(date.toString('dddd dd MMMM'))
+            date_label = date.toString('dddd dd MMMM')
         else:
-            date_label = str(date.toString('dddd dd MMMM, yyyy'))
+            date_label = date.toString('dddd dd MMMM, yyyy')
         if date_label in self.added_dates:
             # This date has already been added. Don't bother adding it again.
-            print 'Ignored', date_label
+            print('Ignored', date_label)
             return
         if archive_path:
             pixmap = QPixmap.fromImage(thumbnail_image)

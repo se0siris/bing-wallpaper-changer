@@ -1,7 +1,6 @@
 import os
-from PyQt4.QtCore import QObject, pyqtSignal, QString
-from PyQt4.QtGui import QDesktopServices
-from PyQt4.QtSql import QSqlDatabase, QSqlQuery
+from PyQt5.QtCore import QObject, pyqtSignal, QStandardPaths
+from PyQt5.QtSql import QSqlDatabase, QSqlQuery
 
 __author__ = 'Gary'
 
@@ -12,20 +11,19 @@ class CopyrightDatabase(QObject):
     """
 
     # Signals
-    error = pyqtSignal(QString, QString)
+    error = pyqtSignal(str, str)
 
     def __init__(self, parent=None):
         super(CopyrightDatabase, self).__init__(parent)
-        settings_folder = str(QDesktopServices.storageLocation(QDesktopServices.DataLocation))
+        settings_folder = QStandardPaths.writableLocation(QStandardPaths.DataLocation)
         db_path = os.path.join(settings_folder, 'copyright.db')
 
-        self.db = QSqlDatabase.addDatabase('QSQLITE')
-        """@type : QSqlDatabase"""
+        self.db = QSqlDatabase.addDatabase('QSQLITE')  # type: QSqlDatabase
         self.db.setDatabaseName(db_path)
 
         self.db.open()
 
-        if not 'copyright' in self.db.tables():
+        if 'copyright' not in self.db.tables():
             self.create_copyright_table()
 
     def create_copyright_table(self):
@@ -73,7 +71,7 @@ class CopyrightDatabase(QObject):
             self.error.emit('Error getting all copyright info', query.lastError().text())
             return info
         while query.next():
-            image_date = str(query.value(0).toString())
-            copyright_info = unicode(query.value(1).toString())
+            image_date = query.value(0)
+            copyright_info = query.value(1)
             info[image_date] = copyright_info
         return info
