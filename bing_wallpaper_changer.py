@@ -1,6 +1,6 @@
 """
 Bing Wallpaper Changer
-Copyright (c) 2019 Gary Hughes
+Copyright (c) 2020 Gary Hughes
 """
 import getpass
 import struct
@@ -23,7 +23,10 @@ from ui.mainwindow import MainWindow
 from ui.message_boxes import message_box_ok, message_box_error
 
 
-VERSION = '2.0.1'
+VERSION_NUMBER = (2, 0, 2, 0)
+VERSION_STRING = '.'.join(map(str, VERSION_NUMBER[:-1]))
+APP_NAME = 'Bing Wallpaper Changer'
+ORG_NAME = 'overThere.co.uk'
 
 
 def except_hook(cls, exception, tb):
@@ -42,7 +45,7 @@ def except_hook(cls, exception, tb):
         separator, time_string,
         f'Username: {user_name:s}',
         f'Machine: {machine_name:s}',
-        f'Version: {VERSION:s}',
+        f'Version: {VERSION_STRING:s}',
         separator, error_message,
         separator, tb_info
     ]
@@ -59,7 +62,7 @@ def except_hook(cls, exception, tb):
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description='Bing Wallpaper Changer', add_help=False)
+    parser = argparse.ArgumentParser(description=APP_NAME, add_help=False)
 
     parser.add_argument('--quit', dest='quit', action='store_true', default=False, help='update wallpaper and exit')
     parser.add_argument('--quit-existing', dest='quit_existing', action='store_true', default=False,
@@ -67,7 +70,7 @@ def parse_arguments():
     parser.add_argument('--native-style', dest='native_style', action='store_true', default=False,
                         help='use native UI style')
     parser.add_argument('--help', dest='help', action='store_true', help='show help window')
-    parser.add_argument('--version', action='version', version='Bing Wallpaper Changer %s' % VERSION)
+    parser.add_argument('--version', action='version', version=f'{APP_NAME} {VERSION_STRING}')
 
     # Here's a dirty hack to allow argparse's errors to be displayed in a message box.
     # Re-direct stderr to a StringIO object. If argparse raises SystemExit switch stderr back from our
@@ -81,7 +84,7 @@ def parse_arguments():
         sys.stderr = backup_stderr
         temp_buffer.seek(0)
         error = temp_buffer.read()
-        message_box_ok('Bing Wallpaper Changer', error)
+        message_box_ok(APP_NAME, error)
         sys.exit()
     sys.stderr = backup_stderr
 
@@ -96,7 +99,7 @@ def parse_arguments():
 
 
 def instance_check(app):
-    app.instance_check = QSharedMemory('Bing Wallpaper Changer - Instance Check')
+    app.instance_check = QSharedMemory(f'{APP_NAME} - Instance Check')
     if not app.instance_check.create(4, QSharedMemory.ReadWrite):
         # Already running. Read the PID from the shared memory and return it.
         app.instance_check.attach(QSharedMemory.ReadOnly)
@@ -131,9 +134,9 @@ def startmain():
     app_icon = QIcon(':/icons/ui/ot_icon.svg')
     print(app_icon.isNull(), app_icon.pixmap(200, 200).isNull())
 
-    app.setApplicationName('Bing Wallpaper Changer')
-    app.setApplicationVersion(VERSION)
-    app.setOrganizationName('overThere.co.uk')
+    app.setApplicationName(APP_NAME)
+    app.setApplicationVersion(VERSION_STRING)
+    app.setOrganizationName(ORG_NAME)
     app.setWindowIcon(app_icon)
 
     print('AppName: {0:s}'.format(app.applicationName()))
