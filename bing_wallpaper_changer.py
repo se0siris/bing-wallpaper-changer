@@ -23,7 +23,7 @@ from ui.mainwindow import MainWindow
 from ui.message_boxes import message_box_ok, message_box_error
 
 
-VERSION_NUMBER = (2, 0, 2, 0)
+VERSION_NUMBER = (2, 0, 3, 0)
 VERSION_STRING = '.'.join(map(str, VERSION_NUMBER[:-1]))
 APP_NAME = 'Bing Wallpaper Changer'
 ORG_NAME = 'overThere.co.uk'
@@ -172,4 +172,3 @@ def startmain():
 if __name__ == "__main__":
     sys.excepthook = except_hook
     startmain()
-

@@ -55,7 +55,7 @@ version = version_info.VSVersionInfo(
 excludes = (
     'numpy', 'pywin', 'tcl', 'tk', 'Tkinter', '_tkinter', 'test', 'lib2to3', 'Include',
     'ImageTk', 'PIL._imagingtk', 'PyInstaller', '_hashlib', '_ssl', 'bz2', '_bsddb',
-    'PIL'
+    'PIL', 'asyncio', 'lzma', 'decimal', 'multiprocessing', 'queue', 'pyconfig'
 )
 
 block_cipher = None
@@ -76,15 +76,10 @@ a = Analysis(
 
 # Exclude DLLs that aren't needed.
 ex_plugins = (
-    'd3dcompiler', 'libeay32', 'libegl', 'libgles', 'opengl', 'ssleay32',
-    'genericbearer',
-    'qgif', 'qicns', 'qico', 'qtga', 'qtiff', 'qwbmp', 'qwebp',
-    'qminimal', 'qoffscreen', 'qwebgl',
-    'qxdgdesktopportal',
-    'qsqlmysql', 'qsqlodbc', 'qsqlpsql',
-    'qwindowsvistastyle',
-    'qtbase_',
-    'libcrypto', 'libssl', 'dbus', '5qml', '5quick', '5websockets'
+    'd3dcompiler', 'libeay32', 'libegl', 'libgles', 'opengl', 'ssleay32', 'genericbearer', 'qgif', 'qicns',
+    'qico', 'qtga', 'qtiff', 'qwbmp', 'qwebp', 'qminimal', 'qoffscreen', 'qwebgl', 'qxdgdesktopportal',
+    'qsqlmysql', 'qsqlodbc', 'qsqlpsql', 'qwindowsvistastyle', 'qtbase_', 'libcrypto', 'libssl', 'dbus',
+    '5qml', '5quick', '5websockets', 'api-ms-win'
 )
 regex_plugin_filter = re.compile(r'^.*(?:{0:s}).*$'.format('|'.join(ex_plugins)))
 
