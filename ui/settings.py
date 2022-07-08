@@ -132,3 +132,5 @@ class Settings(object):
             self.settings.setValue('Linux/desktop', 'kde4')
         elif value == 5:
             self.settings.setValue('Linux/desktop', 'cinnamon')
+        elif value == 6:
+            self.settings.setValue('Linux/desktop', 'gnome')

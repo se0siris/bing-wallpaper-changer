@@ -522,6 +522,11 @@
               <string>Cinnamon</string>
              </property>
             </item>
+            <item>
+             <property name="text">
+              <string>Gnome</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>
