@@ -223,7 +223,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def load_settings(self):
         self.cb_resolution.setCurrentIndex(self.settings.image_resolution)
 
-        self.sb_update_interval.setValue(self.settings.auto_update_interval / 60000)
+        self.sb_update_interval.setValue(self.settings.auto_update_interval // 60000)
         self.on_sb_update_interval_valueChanged(self.sb_update_interval.value())
         self.cb_auto_update.setChecked(self.settings.auto_update_enabled)
 
