@@ -33,6 +33,8 @@ class WallpaperChanger(object):
                 return self._kde4(filepath)
             elif env == 'cinnamon':
                 return self._cinnamon(filepath)
+            elif env == 'gnome':
+                return self._gnome(filepath)
 
     def _windows(self, filepath):
         import ctypes
@@ -108,3 +110,13 @@ activity.reloadConfig();
     def _cinnamon(self, filepath):
         error = self.process.execute('gsettings set org.cinnamon.desktop.background picture-uri "file://{0:s}"'.format(filepath))
         return not bool(error)
+
+    def _gnome(self, filepath):
+        error = False
+        for picture_uri in ('picture-uri', 'picture-uri-dark'):
+            result = self.process.execute(
+                f'gsettings set org.gnome.desktop.background {picture_uri} "file://{filepath}"'
+            )
+            if not result:
+                error = True
+        return not error
