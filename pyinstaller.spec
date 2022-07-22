@@ -103,7 +103,7 @@ exe = EXE(pyz,
           strip=False,
           upx=False,
           console=False,
-          icon=r'ot_icon.ico',
+          icon=r'ui/ot_icon.ico',
           version=version
           )
 
