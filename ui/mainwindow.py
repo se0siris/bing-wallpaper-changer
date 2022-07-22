@@ -305,6 +305,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                                                       Qt.SmoothTransformation)
         self.lbl_image_preview.setPixmap(resized_pixmap)
 
+    def run_custom(self):
+        if self.cb_run_command.isChecked() and self.le_command.text():
+            self.update_status_text('Running custom command...')
+            error = QProcess.execute(self.le_command.text())
+            if error:
+                self.system_tray_icon.showMessage('Error running command',
+                                                'The command specified in the settings failed to run. Please check '
+                                                'the path.',
+                                                QSystemTrayIcon.Critical)
+
     def apply_wallpaper(self):
         """
         Slot documentation goes here.
@@ -315,14 +325,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.preview_image.save(temp_path, quality=100)
         self.changer.apply_wallpaper(temp_path)
 
-        if self.cb_run_command.isChecked() and self.le_command.text():
-            self.update_status_text('Running custom command...')
-            error = QProcess.execute(self.le_command.text())
-            if error:
-                self.system_tray_icon.showMessage('Error running command',
-                                                  'The command specified in the settings failed to run. Please check '
-                                                  'the path.',
-                                                  QSystemTrayIcon.Critical)
+        self.run_custom()
+        # if self.cb_run_command.isChecked() and self.le_command.text():
+            # self.update_status_text('Running custom command...')
+            # error = QProcess.execute(self.le_command.text())
+            # if error:
+                # self.system_tray_icon.showMessage('Error running command',
+                                                  # 'The command specified in the settings failed to run. Please check '
+                                                  # 'the path.',
+                                                  # QSystemTrayIcon.Critical)
 
         # Check for --quit command switch to see if we need to quit now that the wallpaper has been applied.
         if self.app.args.quit:
@@ -459,6 +470,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.image_downloader.set_resolution(str(self.cb_resolution.currentText()))
         self.button_refresh.setEnabled(False)
         self.image_downloader.get_full_wallpaper()
+        self.run_custom()
 
     @pyqtSlot(int)
     def on_tabWidget_currentChanged(self, index):
