@@ -98,7 +98,7 @@ exe = EXE(pyz,
           strip=False,
           upx=False,
           console=False,
-          icon=r'c:\dev\Graphics\Icons\man_icon.ico',
+          icon=r'ui/ot_icon.ico',
           version=version
           )
 
