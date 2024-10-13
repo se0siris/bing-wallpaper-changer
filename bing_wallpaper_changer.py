@@ -160,13 +160,14 @@ def startmain():
             else:
                 os.killpg(existing_pid, signal.SIGKILL)
         else:
-            message_box_error('Program already running.',
-                              'You can only have one copy of the Bing Wallpaper Changer running at once.')
+            message_box_error(
+                'Program already running.',
+                'You can only have one copy of the Bing Wallpaper Changer running at once.'
+            )
         sys.exit()
 
     mainwindow = MainWindow()
-    # mainwindow.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":

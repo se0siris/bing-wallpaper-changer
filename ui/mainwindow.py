@@ -6,14 +6,14 @@ Module implementing MainWindow.
 import os
 import platform
 import tempfile
-from xml.etree import ElementTree
 import re
 
 import shutil
-from PyQt5.QtGui import QImage, QPixmap, QIcon, QImageReader
+from pathlib import Path
+
+from PyQt5.QtGui import QImage, QPixmap, QIcon, QPixmapCache
 from PyQt5.QtWidgets import QMainWindow, QApplication, QSystemTrayIcon, QFileDialog, QListWidgetItem
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, Qt, QDate, QTimer, QProcess, QUrl, QObject, QSize
-from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest
+from PyQt5.QtCore import pyqtSlot, Qt, QDate, QTimer, QProcess, QSize, QSortFilterProxyModel
 
 from ui.custom_widgets import SystemTrayIcon
 from .Ui_mainwindow import Ui_MainWindow
@@ -21,118 +21,10 @@ from ui.databases import CopyrightDatabase
 from ui.message_boxes import message_box_error
 from ui.settings import Settings
 from ui.wallpaper_changer import WallpaperChanger
-
+from .image_downloader import ImageDownloader
+from .models import HistoryListModel
 
 re_archive_file = re.compile(r'[0-9]{8}\.jpg')
-
-
-class ImageDownloader(QObject):
-
-    TYPE_META = 1000
-    ATTEMPTS = 1001
-
-    # Signals.
-    download_finished = pyqtSignal(QImage, QDate, str)
-    download_failed = pyqtSignal(str)
-    thumbnail_download_finished = pyqtSignal(QImage, QDate, str, int)
-    status_text = pyqtSignal(str)
-
-    def __init__(self, parent=None):
-        super(ImageDownloader, self).__init__(parent)
-        self.resolution = '1920x1200'
-        self.last_image_url = None
-        self.manager = QNetworkAccessManager()
-        self.manager.finished.connect(self.reply_finished)
-
-    def set_resolution(self, resolution):
-        """
-        Set the image resolution.
-
-        @param resolution: 1024x768, 1280x720, 1366x768, 1920x1200
-        @type: str
-        """
-        self.resolution = resolution
-
-    def _get_url(self, url_string, request_type=None, request_metadata=None):
-        url = QUrl(url_string)
-        request = QNetworkRequest(QUrl(url))
-        if request_type is not None:
-            request.setAttribute(self.TYPE_META, (request_type, request_metadata))
-        self.manager.get(request)
-
-    def get_full_wallpaper(self, day_index=0):
-        self.status_text.emit('Checking for wallpaper update...')
-        xml_url = 'http://www.bing.com/HPImageArchive.aspx?format=xml&idx={}&n=1&mkt=en-ww'.format(day_index)
-        self._get_url(xml_url, 0)
-
-    def get_history_thumbs(self, day_index=0):
-        xml_url = 'http://www.bing.com/HPImageArchive.aspx?format=xml&idx={}&n=8&mkt=en-ww'.format(day_index)
-        self._get_url(xml_url, 3, day_index)
-
-    def parse_daily_xml(self, xml_data, full_image=False, day_index=0):
-        root = ElementTree.fromstring(xml_data)
-
-        if full_image:
-            base_url = 'http://www.bing.com' + root[0].find('urlBase').text
-            start_date = QDate.fromString(root[0].find('startdate').text, 'yyyyMMdd')
-            copyright_info = root[0].find('copyright').text
-
-            image_url = '{}_{}.jpg'.format(base_url, self.resolution)
-            print(image_url)
-            if image_url == self.last_image_url:
-                print(f'Image is the same as last downloaded image. ({image_url})')
-                self.download_finished.emit(QImage(), QDate(), '')
-                return
-            self.status_text.emit('Downloading image...')
-            self.last_image_url = image_url
-            self._get_url(image_url, 1, (start_date, copyright_info))
-        else:
-            for image_number in range(len(root) - 1):
-                image_day_index = image_number + day_index
-                url = 'http://www.bing.com' + root[image_number].find('url').text
-                image_date = QDate.fromString(root[image_number].find('startdate').text, 'yyyyMMdd')
-                copyright_info = root[image_number].find('copyright').text
-                self._get_url(url, 4, (image_date, copyright_info, image_day_index))
-
-    def reply_finished(self, reply):
-        url = reply.url()
-        request = reply.request()
-        print('URL Downloaded:', str(url.toEncoded()))
-        if reply.error():
-            attempts = request.attribute(self.ATTEMPTS)
-            attempts = 0 if attempts is None else attempts
-            if attempts <= 10:
-                request.setAttribute(self.ATTEMPTS, attempts + 1)
-                print('Network not available. Trying again in 5 seconds...', self.manager.networkAccessible())
-                QTimer.singleShot(5000, lambda: self.manager.get(request))
-                return
-
-            error_message = str(reply.errorString())
-            self.download_failed.emit(error_message)
-            print('Download of {0:s} failed: {1:s}'.format(url.toEncoded(), error_message))
-        else:
-            # print 'Mime-type:', str(reply.header(QNetworkRequest.ContentTypeHeader).toString())
-            data = reply.readAll()
-            attribute = request.attribute(self.TYPE_META)
-
-            try:
-                request_type, request_metadata = attribute
-            except (IndexError, TypeError):
-                return
-
-            if request_type == 0:  # Daily wallpaper XML.
-                self.parse_daily_xml(data, True)
-            elif request_type == 1:
-                start_date, copyright_info = request_metadata
-                wallpaper_image = QImage.fromData(data)
-                self.download_finished.emit(wallpaper_image, start_date, copyright_info)
-            if request_type == 3:  # History thumbnails.
-                day_index = request_metadata
-                self.parse_daily_xml(data, False, day_index)
-            elif request_type == 4:
-                image_date, copyright_info, image_day_index = request_metadata
-                wallpaper_image = QImage.fromData(data)
-                self.thumbnail_download_finished.emit(wallpaper_image, image_date, copyright_info, image_day_index)
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -147,6 +39,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
         self.app = QApplication.instance()
+
+        self._closed_from_tray = False
 
         # Set window title to include application version number.
         title = '{0:s} - v{1:s}'.format(
@@ -174,6 +68,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.system_tray_icon.activated.connect(self.system_tray_icon_activated)
         self.system_tray_icon.show()
 
+        self.history_list_model = HistoryListModel()
+        self.history_list_proxy_model = QSortFilterProxyModel()
+        self.history_list_proxy_model.setSourceModel(self.history_list_model)
+        self.lv_wallpaper_history.setModel(self.history_list_model)
+
         self.image_downloader = ImageDownloader()
         self.image_downloader.status_text.connect(self.update_status_text)
         self.image_downloader.download_failed.connect(self.download_failed)
@@ -186,6 +85,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.cb_auto_update.isChecked():
             self.refresh_timer.start()
 
+    def close(self):
+        """
+        Override close method to minimize the window instead of closing it.
+        """
+        self._closed_from_tray = True
+        return super(MainWindow, self).close()
+
     def resizeEvent(self, event):
         """
         @type event: QEvent
@@ -197,8 +103,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         @type event: QEvent
         """
-        if self.sender() is self.system_tray_icon.exit_action:
-            super(MainWindow, self).closeEvent(event)
+        if self._closed_from_tray:
+            return super(MainWindow, self).closeEvent(event)
         else:
             event.ignore()
             self.setVisible(False)
@@ -213,7 +119,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.system_tray_icon.setIcon(self.app.windowIcon())
 
-    def update_status_text(self, text):
+    @pyqtSlot(str)
+    def update_status_text(self, text: str):
         """
         @type text: str
         """
@@ -243,16 +150,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         env_index = self.cb_change_method.findText(env_name, Qt.MatchFixedString)
         self.cb_change_method.setCurrentIndex(env_index)
 
-    def system_tray_icon_activated(self, reason):
+    @pyqtSlot(QSystemTrayIcon.ActivationReason)
+    def system_tray_icon_activated(self, reason: QSystemTrayIcon.ActivationReason):
         if reason == QSystemTrayIcon.DoubleClick:
             self.show()
             self.raise_()
             self.update_preview_size()
 
-    def download_failed(self, error_message):
+    @pyqtSlot(str)
+    def download_failed(self, error_message: str):
         """
         Report that the download failed to the user and re-enable the Refresh button
-        :type error_message: QString
         :return:
         :rtype:
         """
@@ -263,12 +171,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lbl_image_preview.setText('[NO PREVIEW]')
         self.lbl_image_info.setText('Last download attempt failed.')
 
-    def download_finished(self, wallpaper_image, start_date, copyright_info):
-        """
-        @type wallpaper_image: QImage
-        @type start_date: QDate
-        @type copyright_info: str
-        """
+    @pyqtSlot(QImage, QDate, str)
+    def download_finished(self, wallpaper_image: QImage, start_date: QDate, copyright_info: str):
         if not wallpaper_image.isNull():
             self.preview_image = wallpaper_image
             self.update_preview_size()
@@ -283,26 +187,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.button_refresh.setEnabled(True)
         self.lbl_status.setText('')
 
-    def thumbnail_download_finished(self, thumbnail_image, image_date, copyright_info, image_day_index):
-        """
-        @type thumbnail_image: QImage
-        @type label: str
-        @type copyright_info: str
-        @type image_day_index: int
-        """
+    @pyqtSlot(QImage, QDate, str, int)
+    def thumbnail_download_finished(self, thumbnail_image: QImage, image_date: QDate, copyright_info: str,
+                                    image_day_index: int):
         archive_path = self.get_archive_path(image_date)
         if not os.path.isfile(archive_path):
             archive_path = None
-        self.lw_wallpaper_history.add_item(thumbnail_image, image_date, copyright_info, image_day_index, archive_path)
-        self.lw_wallpaper_history.sortItems(Qt.AscendingOrder)
+        self.history_list_model.add_item(thumbnail_image, image_date, copyright_info, image_day_index, archive_path)
 
     def update_preview_size(self):
         if self.preview_image.isNull():
             return
         label_size = self.lbl_image_preview.size()
-        resized_pixmap = QPixmap.fromImage(self.preview_image).scaled(label_size,
-                                                                      Qt.KeepAspectRatio,
-                                                                      Qt.SmoothTransformation)
+        resized_pixmap = QPixmap.fromImage(self.preview_image).scaled(
+            label_size, Qt.KeepAspectRatio, Qt.SmoothTransformation
+        )
         self.lbl_image_preview.setPixmap(resized_pixmap)
 
     def run_custom(self):
@@ -310,10 +209,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.update_status_text('Running custom command...')
             error = QProcess.execute(self.le_command.text())
             if error:
-                self.system_tray_icon.showMessage('Error running command',
-                                                'The command specified in the settings failed to run. Please check '
-                                                'the path.',
-                                                QSystemTrayIcon.Critical)
+                self.system_tray_icon.showMessage(
+                    'Error running command',
+                    'The command specified in the settings failed to run. Please check the path.',
+                    QSystemTrayIcon.Critical
+                )
 
     def apply_wallpaper(self):
         """
@@ -326,14 +226,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.changer.apply_wallpaper(temp_path)
 
         self.run_custom()
-        # if self.cb_run_command.isChecked() and self.le_command.text():
-            # self.update_status_text('Running custom command...')
-            # error = QProcess.execute(self.le_command.text())
-            # if error:
-                # self.system_tray_icon.showMessage('Error running command',
-                                                  # 'The command specified in the settings failed to run. Please check '
-                                                  # 'the path.',
-                                                  # QSystemTrayIcon.Critical)
 
         # Check for --quit command switch to see if we need to quit now that the wallpaper has been applied.
         if self.app.args.quit:
@@ -362,30 +254,33 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         :rtype: QDate, unicode, unicode
         """
-        image_reader = QImageReader()
         regex_date_split = re.compile(r'(\d{4})(\d{2})(\d{2})')
 
         copyright_info = self.copyright_db.get_all_info()
         archive_folder = self.settings.archive_location
-        for filename in reversed([x for x in os.listdir(archive_folder) if re_archive_file.match(x)]):
-            year, month, day = list(map(int, regex_date_split.findall(filename)[0]))
+
+        archive_filenames = (
+            entry.name for entry in sorted(
+                Path(archive_folder).iterdir(), reverse=True
+            )
+            if entry.is_file() and re_archive_file.match(entry.name)
+        )
+
+        for filename in archive_filenames:
+            year, month, day = (int(x) for x in regex_date_split.findall(filename)[0])
             wallpaper_date = QDate(year, month, day)
             wallpaper_copyright = copyright_info.get('{0:04d}-{1:02d}-{2:02d}'.format(year, month, day), '')
             wallpaper_filename = os.path.join(str(archive_folder), filename)
 
-            image_reader.setFileName(wallpaper_filename)
-            image_size = image_reader.size()
-            image_size.scale(QSize(200, 125), Qt.IgnoreAspectRatio)
-            image_reader.setScaledSize(image_size)
-            thumbnail_image = image_reader.read()
-            if thumbnail_image.isNull():
-                continue
-            self.lw_wallpaper_history.add_item(thumbnail_image, wallpaper_date, wallpaper_copyright,
-                                               archive_path=wallpaper_filename)
-            self.app.processEvents()
-        self.lw_wallpaper_history.sortItems(Qt.AscendingOrder)
+            self.history_list_model.add_item(
+                None, wallpaper_date, wallpaper_copyright, archive_path=wallpaper_filename
+            )
 
-    def change_method_changed(self, index):
+        print('Archive wallpapers loaded.')
+        # self.lw_wallpaper_history.sortItems(Qt.AscendingOrder)
+
+    @pyqtSlot(int)
+    def change_method_changed(self, index: int):
         self.settings.linux_desktop = index
 
     @pyqtSlot(int)
@@ -474,15 +369,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @pyqtSlot(int)
     def on_tabWidget_currentChanged(self, index):
-        self.lw_wallpaper_history.clear()
+        self.history_list_model.clear()
         history_index = self.tabWidget.indexOf(self.tab_history)
         if index == history_index:
             print('History')
-            self.lw_wallpaper_history.setIconSize(QSize(200, 200))
+            self.lv_wallpaper_history.setIconSize(QSize(200, 200))
             for day_index in [0, 8, 16]:
                 self.image_downloader.get_history_thumbs(day_index)
             if self.settings.archive_enabled:
                 self.get_archive_wallpapers()
+        else:
+            QPixmapCache.clear()
 
     @pyqtSlot(QListWidgetItem)
     def on_lw_wallpaper_history_itemDoubleClicked(self, item):
@@ -499,7 +396,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             try:
                 shutil.copyfile(archive_path, temp_path)
             except IOError:
-                message_box_error('Error applying wallpaper', 'Could not copy wallpaper image to temp folder.')
+                message_box_error(
+                    'Error applying wallpaper',
+                    'Could not copy wallpaper image to temp folder.'
+                )
                 return
             self.update_status_text('Applying wallpaper...')
             self.changer.apply_wallpaper(temp_path)
@@ -507,4 +407,3 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             # The day index is still available. Start the download.
             self.image_downloader.get_full_wallpaper(item.image_day_index)
-

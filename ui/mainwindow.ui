@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>717</width>
-    <height>454</height>
+    <height>525</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -522,11 +522,6 @@
               <string>Cinnamon</string>
              </property>
             </item>
-            <item>
-             <property name="text">
-              <string>Gnome</string>
-             </property>
-            </item>
            </widget>
           </item>
          </layout>
@@ -552,24 +547,27 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <widget class="ListWidget" name="lw_wallpaper_history">
+         <widget class="QListView" name="lv_wallpaper_history">
           <property name="dragDropMode">
            <enum>QAbstractItemView::NoDragDrop</enum>
-          </property>
-          <property name="verticalScrollMode">
-           <enum>QAbstractItemView::ScrollPerPixel</enum>
-          </property>
-          <property name="horizontalScrollMode">
-           <enum>QAbstractItemView::ScrollPerPixel</enum>
           </property>
           <property name="movement">
            <enum>QListView::Static</enum>
           </property>
+          <property name="flow">
+           <enum>QListView::LeftToRight</enum>
+          </property>
+          <property name="isWrapping" stdset="0">
+           <bool>true</bool>
+          </property>
           <property name="resizeMode">
            <enum>QListView::Adjust</enum>
           </property>
-          <property name="spacing">
-           <number>5</number>
+          <property name="gridSize">
+           <size>
+            <width>250</width>
+            <height>150</height>
+           </size>
           </property>
           <property name="viewMode">
            <enum>QListView::IconMode</enum>
@@ -732,11 +730,6 @@
   <customwidget>
    <class>ImageLabel</class>
    <extends>QLabel</extends>
-   <header>ui.custom_widgets</header>
-  </customwidget>
-  <customwidget>
-   <class>ListWidget</class>
-   <extends>QListWidget</extends>
    <header>ui.custom_widgets</header>
   </customwidget>
  </customwidgets>
